@@ -1,0 +1,415 @@
+.courses-page {
+  min-height: calc(100vh - 80px);
+  padding: 3rem 1rem;
+}
+
+.courses-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.courses-header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 0.5rem;
+}
+
+.courses-header .faculty-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.courses-header .subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ─── Back Button & Navigation ─── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.back-btn:hover {
+  transform: translateX(-4px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+body[dir="rtl"] .back-btn:hover {
+  transform: translateX(4px);
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.breadcrumb-link {
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: var(--accent-primary);
+}
+
+.breadcrumb-separator {
+  color: var(--border-color);
+}
+
+/* ─── Faculties Grid ─── */
+.faculties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.faculty-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.faculty-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, var(--border-color) 0%, transparent 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+.faculty-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 30px var(--hover-glow);
+}
+
+.faculty-card:hover::after {
+  background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
+}
+
+.faculty-card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, var(--gradient-from) 0%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.faculty-card:hover .faculty-card-glow {
+  opacity: 0.12;
+}
+
+.faculty-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  transition: transform 0.4s ease;
+}
+
+.faculty-icon-wrapper svg {
+  width: 48px;
+  height: 48px;
+}
+
+.faculty-card:hover .faculty-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.faculty-abbr {
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.faculty-card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.faculty-action-btn {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.8;
+  transition: gap 0.2s ease;
+}
+
+.faculty-card:hover .faculty-action-btn {
+  opacity: 1;
+  gap: 0.75rem;
+}
+
+/* ─── Semesters Grid ─── */
+.semesters-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.semester-selection-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.semester-selection-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sem-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  color: var(--accent-primary);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.08);
+}
+
+.semester-selection-card:hover .sem-number {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, #3b82f6 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.sem-info {
+  flex: 1;
+  text-align: right;
+}
+
+body[dir="ltr"] .sem-info {
+  text-align: left;
+}
+
+.sem-info h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.sem-info p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.sem-arrow {
+  opacity: 0.5;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.semester-selection-card:hover .sem-arrow {
+  opacity: 1;
+  transform: translateX(-4px);
+}
+
+body[dir="ltr"] .semester-selection-card:hover .sem-arrow {
+  transform: translateX(4px);
+}
+
+/* ─── Subject Sections ─── */
+.subjects-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.subject-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.subject-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  border-radius: 16px;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.subject-header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.subject-header span {
+  font-size: 0.9rem;
+  background: rgba(255,255,255,0.2);
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+}
+
+/* ─── Semester Cards Grid ─── */
+.semesters-inline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.semester-inline-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.semester-inline-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.semester-badge {
+  display: inline-block;
+  background: rgba(59,130,246,0.15);
+  color: #3b82f6;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.semester-badge.pharm {
+  background: rgba(139,92,246,0.15);
+  color: #8b5cf6;
+}
+
+.semester-inline-card h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.semester-inline-card p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  flex: 1;
+}
+
+.course-price {
+  margin-top: 0.5rem;
+}
+
+.badge-free {
+  background: rgba(16,185,129,0.15);
+  color: #10b981;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-price {
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ─── Empty state helper ─── */
+.empty-courses-icon {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Animations */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@media (max-width: 768px) {
+  .courses-header h1 { font-size: 2.2rem; }
+  .courses-header .faculty-title { font-size: 1.8rem; }
+  .faculties-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+  .semesters-selection-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .semesters-inline-grid { grid-template-columns: 1fr; }
+  .subject-header { padding: 1rem 1.25rem; }
+  .subject-header h2 { font-size: 1.3rem; }
+}

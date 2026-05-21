@@ -1,0 +1,306 @@
+/* Floating Support Widget Container */
+.floating-support-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  font-family: inherit;
+}
+
+/* Handle RTL mirror positioning */
+body[dir='rtl'] .floating-support-container {
+  right: auto;
+  left: 2rem;
+}
+
+/* Floating Action Button (FAB) Trigger */
+.support-toggle-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 8px 30px var(--accent-glow);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+  z-index: 10;
+}
+
+.support-toggle-fab:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 35px var(--accent-primary), 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.support-toggle-fab:active {
+  transform: scale(0.95);
+}
+
+/* FAB Icon Animations */
+.fab-icon-container {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-icon-main,
+.fab-icon-close {
+  position: absolute;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Default state: main icon visible, close icon hidden/rotated */
+.fab-icon-close {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+.floating-support-container.active .fab-icon-main {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+.floating-support-container.active .fab-icon-close {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+/* Pulsing Outer Ring */
+.fab-pulse-ring {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-primary);
+  opacity: 0;
+  animation: fab-pulse 2.5s infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes fab-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Support Card Popup */
+.support-card-popup {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body[dir='rtl'] .support-card-popup {
+  right: auto;
+  left: 0;
+}
+
+.support-card-popup.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Card Close Button */
+.support-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+body[dir='rtl'] .support-close-btn {
+  right: auto;
+  left: 15px;
+}
+
+.support-close-btn:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
+/* Card Header Section */
+.support-card-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(180deg, var(--input-bg) 0%, transparent 100%);
+}
+
+.support-avatar-glow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.support-header-icon {
+  animation: float-icon 3s ease-in-out infinite;
+}
+
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.online-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  border: 2px solid var(--bg-card);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+body[dir='rtl'] .online-indicator {
+  right: auto;
+  left: 0;
+}
+
+.support-header-info h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.support-header-info p {
+  margin: 4px 0 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Card Body Section */
+.support-card-body {
+  padding: 16px 20px 24px;
+}
+
+.support-message {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  text-align: start;
+}
+
+/* Communication Channels Buttons */
+.support-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.support-btn-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.support-btn-link svg {
+  flex-shrink: 0;
+}
+
+/* WhatsApp Channel Colors and Effects */
+.whatsapp-style {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.25);
+}
+
+.whatsapp-style:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.45);
+}
+
+/* Telegram Channel Colors and Effects */
+.telegram-style {
+  background: linear-gradient(135deg, #37aee2 0%, #1e96c8 100%);
+  box-shadow: 0 4px 15px rgba(0, 136, 204, 0.25);
+}
+
+.telegram-style:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 136, 204, 0.45);
+}
+
+/* Mobile Constraints */
+@media (max-width: 480px) {
+  .floating-support-container {
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+  
+  body[dir='rtl'] .floating-support-container {
+    left: 1.25rem;
+  }
+  
+  .support-card-popup {
+    width: calc(100vw - 2.5rem);
+    right: 0;
+    bottom: 74px;
+  }
+
+  body[dir='rtl'] .support-card-popup {
+    left: 0;
+  }
+}

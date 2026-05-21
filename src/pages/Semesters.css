@@ -1,0 +1,68 @@
+.semesters-page {
+  padding: 4rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.page-header h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent-primary);
+}
+
+.semesters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.semester-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.semester-icon-wrapper {
+  background-color: var(--input-bg);
+  color: var(--accent-primary);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.semester-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent-primary);
+}
+
+.semester-card:hover .semester-icon-wrapper {
+  background-color: var(--accent-primary);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.semester-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.semester-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}

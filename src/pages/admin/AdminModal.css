@@ -1,0 +1,78 @@
+/* ============================================
+   Admin Modal Styles
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2.5rem;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--accent-primary);
+}
+
+/* ============================================
+   Admin Form Styles
+   ============================================ */
+.admin-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.admin-form textarea.input-field {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.admin-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.admin-form .form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.admin-form .form-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.admin-form .form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.admin-form select.input-field {
+  cursor: pointer;
+}

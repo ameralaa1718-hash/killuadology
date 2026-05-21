@@ -1,0 +1,117 @@
+.lectures-page {
+  padding: 4rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+.breadcrumbs {
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.breadcrumbs a {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.breadcrumbs a:hover {
+  color: var(--accent-primary);
+}
+
+.lectures-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.lecture-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  transition: transform 0.2s ease, border-color 0.2s;
+}
+
+.lecture-item:hover {
+  border-color: var(--accent-primary);
+  transform: translateX(5px);
+}
+
+[dir="rtl"] .lecture-item:hover {
+  transform: translateX(-5px);
+}
+
+.lecture-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.lecture-number {
+  background-color: var(--accent-glow);
+  color: var(--accent-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.lecture-details h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.lecture-details p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.lecture-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  background-color: var(--input-bg);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+@media (max-width: 768px) {
+  .lecture-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+  
+  .lecture-actions {
+    width: 100%;
+  }
+
+  .lecture-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
