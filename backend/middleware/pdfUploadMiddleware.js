@@ -4,8 +4,12 @@ import fs from 'fs';
 
 // Ensure the directory exists
 const uploadDir = 'uploads/pdfs';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Warning: Could not create upload directory on startup:', err.message);
 }
 
 // Set storage engine
