@@ -15,7 +15,7 @@ start "MedCourse Backend" cmd /c "cd backend && npm start"
 
 :: Wait 3 seconds to let the server start before opening the browser
 timeout /t 3 /nobreak >nul
-start "" http://localhost:5173
+start ""http://localhost:5173
 
 :: Start the Vite frontend server
 npm run dev
