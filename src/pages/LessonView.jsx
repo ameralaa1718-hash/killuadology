@@ -71,7 +71,21 @@ const LessonView = () => {
   // 3. Tab Visibility & Focus detection
   useEffect(() => {
     const handleFocus = () => setIsFocused(true);
-    const handleBlur = () => setIsFocused(false);
+    
+    const handleBlur = () => {
+      // If the page or any element (like the iframe) is in fullscreen mode,
+      // going fullscreen triggers a window blur. We must ignore it.
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      if (!isFullscreen) {
+        setIsFocused(false);
+      }
+    };
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setIsFocused(false);
@@ -80,14 +94,37 @@ const LessonView = () => {
       }
     };
 
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      if (isFullscreen) {
+        setIsFocused(true);
+      }
+    };
+
     window.addEventListener('focus', handleFocus);
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Listen to fullscreen changes
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
     return () => {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, []);
 
