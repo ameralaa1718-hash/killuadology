@@ -1,4 +1,6 @@
 import Purchase from '../models/Purchase.js';
+import File from '../models/File.js';
+import path from 'path';
 
 // @desc    Create a new purchase request
 // @route   POST /api/purchases
@@ -12,7 +14,14 @@ export const createPurchase = async (req, res) => {
       return res.status(400).json({ message: 'Receipt image is required' });
     }
 
-    const receiptImage = `/uploads/receipts/${req.file.filename}`;
+    // Save receipt image to MongoDB
+    const dbFile = await File.create({
+      filename: `receipt-${Date.now()}${path.extname(req.file.originalname) || '.jpg'}`,
+      contentType: req.file.mimetype,
+      data: req.file.buffer
+    });
+
+    const receiptImage = `/uploads/receipts/${dbFile._id}`;
 
     const purchaseData = {
       student: studentId,

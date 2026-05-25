@@ -20,6 +20,7 @@ import {
 import { getSettings, updateSettings } from '../controllers/settingsController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import uploadPdf from '../middleware/pdfUploadMiddleware.js';
+import File from '../models/File.js';
 
 const router = express.Router();
 
@@ -30,13 +31,23 @@ router.route('/settings')
   .get(getSettings)
   .put(updateSettings);
 
-// Upload PDF route
-router.post('/upload-pdf', uploadPdf.single('pdf'), (req, res) => {
+// Upload PDF route — saves file buffer to MongoDB
+router.post('/upload-pdf', uploadPdf.single('pdf'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'يرجى اختيار ملف PDF للرفع' });
   }
-  const fileUrl = `/uploads/pdfs/${req.file.filename}`;
-  res.json({ url: fileUrl });
+  try {
+    const dbFile = await File.create({
+      filename: `pdf-${Date.now()}.pdf`,
+      contentType: req.file.mimetype,
+      data: req.file.buffer
+    });
+    const fileUrl = `/uploads/pdfs/${dbFile._id}`;
+    res.json({ url: fileUrl });
+  } catch (err) {
+    console.error('Error saving PDF to DB:', err);
+    res.status(500).json({ message: 'حدث خطأ أثناء حفظ الملف' });
+  }
 });
 
 router.get('/stats', getAdminStats);

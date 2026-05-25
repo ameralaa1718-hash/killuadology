@@ -1,26 +1,8 @@
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
 
-// Ensure the directory exists
-const uploadDir = 'uploads/pdfs';
-try {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-} catch (err) {
-  console.warn('Warning: Could not create upload directory on startup:', err.message);
-}
-
-// Set storage engine
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, `pdf-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
+// Use memory storage so files are held in RAM (Buffer) — works in serverless environments
+const storage = multer.memoryStorage();
 
 // Check file type
 function checkFileType(file, cb) {
@@ -38,7 +20,7 @@ function checkFileType(file, cb) {
 // Init upload
 const uploadPdf = multer({
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max limit for PDF documents
+  limits: { fileSize: 16 * 1024 * 1024 }, // 16MB max (MongoDB BSON document limit)
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   }

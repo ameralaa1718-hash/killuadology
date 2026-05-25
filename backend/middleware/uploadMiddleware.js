@@ -1,15 +1,8 @@
 import multer from 'multer';
 import path from 'path';
 
-// Set storage engine
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/receipts/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
+// Use memory storage so files are held in RAM (Buffer) — works in serverless environments
+const storage = multer.memoryStorage();
 
 // Check file type
 function checkFileType(file, cb) {
@@ -27,7 +20,7 @@ function checkFileType(file, cb) {
 // Init upload
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5000000 }, // 5MB max
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   }

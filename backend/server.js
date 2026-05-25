@@ -9,6 +9,7 @@ import courseRoutes from './routes/courseRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import purchaseRoutes from './routes/purchaseRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
+import { serveUpload } from './controllers/uploadController.js';
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ app.use('/api/purchases', purchaseRoutes);
 app.use('/api/settings', settingsRoutes);
 
 const __dirname = path.resolve();
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.get('/uploads/:type/:filename', serveUpload);
 
 app.get('/', (req, res) => {
   res.send('Killuadology API is running...');
