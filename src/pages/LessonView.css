@@ -1,0 +1,256 @@
+/* LessonView Premium Styles */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lesson-view-container {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding: 2.5rem 1rem;
+}
+
+/* Back Link Button */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.25s ease;
+  margin-bottom: 1.5rem;
+}
+
+.back-link:hover {
+  background: var(--input-bg);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: translateX(-4px);
+}
+
+[dir="rtl"] .back-link:hover {
+  transform: translateX(4px);
+}
+
+/* Header Text Styling */
+.lesson-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text-primary) 0%, rgba(var(--text-primary), 0.8) 100%);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-header p {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+/* Premium Segmented Tab Bar */
+.tabs-segmented-control {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.tab-segmented-button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-segmented-button:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-segmented-button.active {
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.08);
+}
+
+/* Content Panel Wrapper */
+.content-glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: var(--card-shadow);
+  min-height: 450px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cinema Video Frame */
+.video-cinema-frame {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background-color: #000;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--accent-glow);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.video-cinema-frame:hover {
+  border-color: rgba(0, 229, 255, 0.4);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 229, 255, 0.15);
+}
+
+/* PDF Material Card */
+.pdf-download-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.8rem 2.2rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pdf-download-card:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: var(--accent-primary);
+  box-shadow: 0 10px 25px rgba(0, 229, 255, 0.08);
+}
+
+.pdf-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Tactile Quiz Options */
+.quiz-question-box {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-inline-start: 4px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.quiz-question-box:hover {
+  border-inline-start-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.quiz-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--accent-glow);
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.quiz-option-button {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.1rem 1.4rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.01);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quiz-option-button:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(var(--accent-primary), 0.5);
+  transform: scale(1.005);
+}
+
+.quiz-option-button.selected {
+  border: 2px solid var(--accent-primary);
+  background: var(--accent-glow);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.radio-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--text-secondary);
+  background: transparent;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.quiz-option-button.selected .radio-circle {
+  border-color: var(--accent-primary);
+}
+
+.radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+@media (max-width: 768px) {
+  .pdf-download-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+  .pdf-download-card a {
+    width: 100%;
+  }
+}

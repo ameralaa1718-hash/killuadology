@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { ArrowRight, PlayCircle, FileText, ClipboardList, CheckCircle2, AlertCircle } from 'lucide-react';
 import './Lectures.css'; // Reuse styles
+import './LessonView.css';
 
 const LessonView = () => {
   const { courseId, lessonId } = useParams();
@@ -236,52 +237,34 @@ const LessonView = () => {
   if (!lesson) return null;
 
   return (
-    <div className="container" style={{ padding: '2rem 1rem' }}>
+    <div className="container lesson-view-container">
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <Link to={`/course/${courseId}`} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', marginBottom: '1rem' }}>
+      <div className="lesson-header" style={{ marginBottom: '2rem' }}>
+        <Link to={`/course/${courseId}`} className="back-link">
           <ArrowRight size={18} /> العودة للمحاضرات
         </Link>
         <h1>{lesson.title}</h1>
-        {lesson.description && <p style={{ color: 'var(--text-secondary)' }}>{lesson.description}</p>}
+        {lesson.description && <p>{lesson.description}</p>}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', flexWrap: 'wrap' }}>
+      <div className="tabs-segmented-control">
         <button 
           onClick={() => setActiveTab('video')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px',
-            background: activeTab === 'video' ? 'var(--accent-glow)' : 'transparent',
-            border: activeTab === 'video' ? '2px solid var(--accent-primary)' : '2px solid transparent',
-            color: activeTab === 'video' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
-          }}
+          className={`tab-segmented-button ${activeTab === 'video' ? 'active' : ''}`}
         >
           <PlayCircle size={20} /> فيديو المحاضرة
         </button>
         <button 
           onClick={() => setActiveTab('files')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px',
-            background: activeTab === 'files' ? 'var(--accent-glow)' : 'transparent',
-            border: activeTab === 'files' ? '2px solid var(--accent-primary)' : '2px solid transparent',
-            color: activeTab === 'files' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
-          }}
+          className={`tab-segmented-button ${activeTab === 'files' ? 'active' : ''}`}
         >
           <FileText size={20} /> الملفات والمذكرات
         </button>
         {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
           <button 
             onClick={() => setActiveTab('quiz')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px',
-              background: activeTab === 'quiz' ? 'var(--accent-glow)' : 'transparent',
-              border: activeTab === 'quiz' ? '2px solid var(--accent-primary)' : '2px solid transparent',
-              color: activeTab === 'quiz' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
-            }}
+            className={`tab-segmented-button ${activeTab === 'quiz' ? 'active' : ''}`}
           >
             <ClipboardList size={20} /> اختبار المحاضرة
           </button>
@@ -289,7 +272,7 @@ const LessonView = () => {
       </div>
 
       {/* Content Area */}
-      <div className="glass-card" style={{ padding: '2rem', minHeight: '400px' }}>
+      <div className="content-glass-panel">
         {activeTab === 'video' && (
           <div>
             {isTampered ? (
@@ -307,14 +290,7 @@ const LessonView = () => {
             ) : lesson.bunnyVideoId ? (
               <div 
                 id="video-container" 
-                style={{ 
-                  position: 'relative', 
-                  paddingTop: '56.25%', 
-                  overflow: 'hidden', 
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: '#000'
-                }}
+                className="video-cinema-frame"
               >
                 {/* Blur Overlay when tab is inactive / blurred */}
                 {!isFocused && (
@@ -398,12 +374,14 @@ const LessonView = () => {
         {activeTab === 'files' && (
           <div>
             {lesson.pdfUrl ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <FileText size={32} color="var(--accent-primary)" />
+              <div className="pdf-download-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                  <div className="pdf-icon-wrapper">
+                    <FileText size={28} />
+                  </div>
                   <div>
-                    <h3 style={{ margin: 0 }}>مذكرة المحاضرة (PDF)</h3>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>اضغط للتحميل أو العرض</p>
+                    <h3 style={{ margin: 0, fontSize: '1.15rem' }}>مذكرة المحاضرة (PDF)</h3>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>اضغط للتحميل أو عرض المذكرة</p>
                   </div>
                 </div>
                 <a href={lesson.pdfUrl.startsWith('http') ? lesson.pdfUrl : `${axios.defaults.baseURL || 'http://localhost:5000'}${lesson.pdfUrl}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none' }}>
@@ -465,51 +443,25 @@ const LessonView = () => {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                   {lesson.quiz.questions.map((q, qIdx) => (
-                    <div key={q._id || qIdx} className="glass-card" style={{ padding: '1.75rem 2rem', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.15)' }}>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: '0 0 1.25rem 0', display: 'flex', gap: '0.75rem', alignItems: 'flex-start', color: 'var(--text-primary)', lineHeight: 1.5 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', background: 'var(--accent-glow)', border: '1px solid var(--accent-primary)', color: 'var(--accent-primary)', borderRadius: '50%', fontSize: '0.85rem', fontWeight: 700, flexShrink: 0, marginTop: '2px' }}>{qIdx + 1}</span>
+                    <div key={q._id || qIdx} className="quiz-question-box">
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 600, margin: '0 0 1.5rem 0', display: 'flex', gap: '0.75rem', alignItems: 'flex-start', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                        <span className="quiz-badge">{qIdx + 1}</span>
                         <span>{q.questionText}</span>
                       </h4>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.85rem' }}>
                         {q.options.map((opt, optIdx) => {
                           const isSelected = selectedAnswers[qIdx] === optIdx;
                           return (
                             <div 
                               key={optIdx} 
                               onClick={() => setSelectedAnswers(prev => ({ ...prev, [qIdx]: optIdx }))}
-                              style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '1rem', 
-                                padding: '1rem 1.25rem', 
-                                borderRadius: '10px', 
-                                border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)', 
-                                background: isSelected ? 'var(--accent-glow)' : 'rgba(255,255,255,0.01)', 
-                                cursor: 'pointer', 
-                                transition: 'all 0.2s ease'
-                              }}
-                              onMouseEnter={(e) => {
-                                if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                              }}
-                              onMouseLeave={(e) => {
-                                if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.01)';
-                              }}
+                              className={`quiz-option-button ${isSelected ? 'selected' : ''}`}
                             >
-                              <div style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                width: '20px', 
-                                height: '20px', 
-                                borderRadius: '50%', 
-                                border: isSelected ? '2px solid var(--accent-primary)' : '2px solid var(--text-secondary)',
-                                background: 'transparent',
-                                flexShrink: 0 
-                              }}>
-                                {isSelected && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-primary)' }} />}
+                              <div className="radio-circle">
+                                {isSelected && <div className="radio-dot" />}
                               </div>
                               <span style={{ fontSize: '0.95rem', color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: isSelected ? 600 : 400 }}>{opt}</span>
                             </div>
@@ -549,7 +501,7 @@ const LessonView = () => {
                     }}
                     className="btn-primary"
                     disabled={submittingQuiz || Object.keys(selectedAnswers).length < lesson.quiz.questions.length}
-                    style={{ padding: '0.8rem 2rem', fontSize: '1.05rem', fontWeight: 600 }}
+                    style={{ padding: '0.8rem 2.5rem', fontSize: '1.05rem', fontWeight: 600, borderRadius: '12px' }}
                   >
                     {submittingQuiz ? 'جاري تصحيح وتسليم الإجابات...' : 'تسليم الاختبار ورؤية النتيجة'}
                   </button>
