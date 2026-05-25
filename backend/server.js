@@ -43,6 +43,7 @@ app.use('/api/settings', settingsRoutes);
 
 const __dirname = path.resolve();
 app.get('/uploads/:type/:filename', serveUpload);
+app.get('/api/uploads/:type/:filename', serveUpload);
 
 app.get('/', (req, res) => {
   res.send('Killuadology API is running...');

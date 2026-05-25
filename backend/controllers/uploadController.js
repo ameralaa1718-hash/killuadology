@@ -9,15 +9,22 @@ import mongoose from 'mongoose';
 export const serveUpload = async (req, res) => {
   const { type, filename } = req.params;
 
+  console.log(`serveUpload requested: type=${type}, filename=${filename}`);
+
+  // Extract ID if there is an extension (e.g. "6a143e049ef822adbac9649a.pdf" -> "6a143e049ef822adbac9649a")
+  const ext = path.extname(filename);
+  const idWithoutExt = ext ? filename.slice(0, -ext.length) : filename;
+
   // Check if filename looks like a MongoDB ObjectId (24 hex chars)
-  const isObjectId = mongoose.Types.ObjectId.isValid(filename) && filename.length === 24;
+  const isObjectId = mongoose.Types.ObjectId.isValid(idWithoutExt) && idWithoutExt.length === 24;
 
   if (isObjectId) {
     // Serve from MongoDB
     try {
-      const file = await File.findById(filename);
+      const file = await File.findById(idWithoutExt);
       if (!file) {
-        return res.status(404).json({ message: 'File not found' });
+        console.log(`File with ID ${idWithoutExt} not found in DB`);
+        return res.status(404).json({ message: 'File not found in database' });
       }
       res.set('Content-Type', file.contentType);
       res.set('Content-Disposition', `inline; filename="${file.filename}"`);
@@ -32,9 +39,11 @@ export const serveUpload = async (req, res) => {
   const __dirname = path.resolve();
   const filePath = path.join(__dirname, 'uploads', type, filename);
 
+  console.log(`Fallback check: looking for local file at ${filePath}`);
+
   if (fs.existsSync(filePath)) {
     return res.sendFile(filePath);
   }
 
-  return res.status(404).json({ message: 'File not found' });
+  return res.status(404).json({ message: 'File not found on disk or database' });
 };

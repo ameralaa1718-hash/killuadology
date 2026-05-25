@@ -315,7 +315,7 @@ const LessonView = () => {
                     filter: !isFocused ? 'blur(12px)' : 'none',
                     transition: 'filter 0.3s ease'
                   }} 
-                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" 
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;" 
                   allowFullScreen
                 ></iframe>
 
