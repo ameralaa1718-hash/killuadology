@@ -73,17 +73,22 @@ const LessonView = () => {
     const handleFocus = () => setIsFocused(true);
     
     const handleBlur = () => {
-      // If the page or any element (like the iframe) is in fullscreen mode,
-      // going fullscreen triggers a window blur. We must ignore it.
-      const isFullscreen = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement
-      );
-      if (!isFullscreen) {
-        setIsFocused(false);
-      }
+      // Use a timeout because the transition to fullscreen takes some milliseconds.
+      // Checking immediately might return false for isFullscreen.
+      setTimeout(() => {
+        const isFullscreen = !!(
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.mozFullScreenElement ||
+          document.msFullscreenElement ||
+          document.webkitCurrentFullScreenElement
+        );
+        // Only trigger blur overlay/filter if the document actually lost focus completely
+        // and we are NOT in fullscreen mode.
+        if (!document.hasFocus() && !isFullscreen) {
+          setIsFocused(false);
+        }
+      }, 250);
     };
 
     const handleVisibilityChange = () => {
@@ -99,7 +104,8 @@ const LessonView = () => {
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.mozFullScreenElement ||
-        document.msFullscreenElement
+        document.msFullscreenElement ||
+        document.webkitCurrentFullScreenElement
       );
       if (isFullscreen) {
         setIsFocused(true);
