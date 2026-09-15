@@ -9,9 +9,13 @@ const emptyForm = {
   title: '',
   description: '',
   order: 1,
+  videoType: 'bunny',
   bunnyVideoId: '',
   bunnyLibraryId: '',
+  videoUrl: '',
+  fileType: 'pdf',
   pdfUrl: '',
+  fileUrl: '',
   isFreePreview: false,
   price: 0,
   quizEnabled: false,
@@ -98,13 +102,20 @@ const ManageLessons = () => {
 
   const handleOpenEdit = (lesson) => {
     setEditingLesson(lesson);
+    const vType = lesson.videoType || (lesson.videoUrl?.includes('youtube') || lesson.videoUrl?.includes('youtu.be') ? 'youtube' : lesson.videoUrl?.includes('t.me') ? 'telegram' : lesson.videoUrl ? 'external' : 'bunny');
+    const fType = lesson.fileType || (lesson.fileUrl?.includes('drive.google.com') ? 'drive' : lesson.fileUrl ? 'external' : 'pdf');
+
     setForm({
       title: lesson.title,
       description: lesson.description || '',
       order: lesson.order,
+      videoType: vType,
       bunnyVideoId: lesson.bunnyVideoId || '',
       bunnyLibraryId: lesson.bunnyLibraryId || '',
+      videoUrl: lesson.videoUrl || '',
+      fileType: fType,
       pdfUrl: lesson.pdfUrl || '',
+      fileUrl: lesson.fileUrl || '',
       isFreePreview: lesson.isFreePreview,
       price: lesson.price || 0,
       quizEnabled: !!(lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0),
@@ -230,74 +241,152 @@ const ManageLessons = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <PlayCircle size={16} />
-                  Bunny Video ID (اختياري الآن)
+              {/* Video Source Selector */}
+              <div className="form-group" style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
+                  <PlayCircle size={18} style={{ color: 'var(--accent-primary)' }} />
+                  مصدر فيديو المحاضرة
                 </label>
-                <input
+                <select
                   className="input-field"
-                  value={form.bunnyVideoId}
-                  onChange={e => setForm({ ...form, bunnyVideoId: e.target.value })}
-                  placeholder="مثال: a1b2c3d4-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                  dir="ltr"
-                />
-                <small style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                  يمكن تعبئته لاحقاً بعد رفع الفيديو على Bunny.net
-                </small>
-              </div>
+                  value={form.videoType || 'bunny'}
+                  onChange={e => setForm({ ...form, videoType: e.target.value })}
+                  style={{ marginBottom: '1rem' }}
+                >
+                  <option value="bunny">🔒 Bunny Stream (فيديو محمي ضد التحميل)</option>
+                  <option value="youtube">▶️ YouTube (رابط فيديو يوتيوب)</option>
+                  <option value="telegram">✈️ Telegram (رابط قناة أو فيديو تليجرام)</option>
+                  <option value="external">🌐 رابط فيديو خارجي (Direct MP4 / Embed)</option>
+                </select>
 
-              <div className="form-group">
-                <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <PlayCircle size={16} />
-                  Bunny Library ID (اختياري)
-                </label>
-                <input
-                  className="input-field"
-                  value={form.bunnyLibraryId}
-                  onChange={e => setForm({ ...form, bunnyLibraryId: e.target.value })}
-                  placeholder="مثال: 123456"
-                  dir="ltr"
-                />
-                <small style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                  إذا تركت هذا الحقل فارغاً، فسيتم استخدام رقم المكتبة الافتراضي من الإعدادات.
-                </small>
-              </div>
+                {form.videoType === 'bunny' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label className="label" style={{ fontSize: '0.85rem' }}>Bunny Video ID</label>
+                      <input
+                        className="input-field"
+                        value={form.bunnyVideoId}
+                        onChange={e => setForm({ ...form, bunnyVideoId: e.target.value })}
+                        placeholder="a1b2c3d4-xxxx-xxxx"
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="label" style={{ fontSize: '0.85rem' }}>Bunny Library ID (اختياري)</label>
+                      <input
+                        className="input-field"
+                        value={form.bunnyLibraryId}
+                        onChange={e => setForm({ ...form, bunnyLibraryId: e.target.value })}
+                        placeholder="مثال: 123456"
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                )}
 
-              <div className="form-group">
-                <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <FileText size={16} />
-                  رابط ملف PDF أو رفع ملف جديد (اختياري)
-                </label>
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <input
-                    className="input-field"
-                    value={form.pdfUrl}
-                    onChange={e => setForm({ ...form, pdfUrl: e.target.value })}
-                    placeholder="https://... أو سيتم تعبئته تلقائياً عند رفع ملف"
-                    dir="ltr"
-                    style={{ flex: 1 }}
-                  />
-                  <label 
-                    className="btn-secondary" 
-                    style={{ 
-                      display: 'inline-flex', alignItems: 'center', gap: '0.3rem', 
-                      cursor: 'pointer', padding: '0.6rem 1rem', borderRadius: '8px', 
-                      fontSize: '0.9rem', whiteSpace: 'nowrap', border: '1px solid var(--border-color)',
-                      margin: 0, justifyContent: 'center'
-                    }}
-                  >
-                    <span>{pdfUploading ? 'جاري الرفع...' : 'رفع ملف PDF'}</span>
-                    <input 
-                      type="file" 
-                      accept="application/pdf" 
-                      onChange={handlePdfUpload} 
-                      disabled={pdfUploading}
-                      style={{ display: 'none' }}
+                {form.videoType === 'youtube' && (
+                  <div>
+                    <label className="label" style={{ fontSize: '0.85rem' }}>رابط يوتيوب (YouTube URL)</label>
+                    <input
+                      className="input-field"
+                      value={form.videoUrl}
+                      onChange={e => setForm({ ...form, videoUrl: e.target.value })}
+                      placeholder="مثال: https://www.youtube.com/watch?v=dQw4w9WgXcQ أو https://youtu.be/..."
+                      dir="ltr"
                     />
-                  </label>
-                </div>
-                {pdfUploadError && <small style={{ color: '#ef4444', display: 'block', marginTop: '0.2rem' }}>{pdfUploadError}</small>}
+                  </div>
+                )}
+
+                {form.videoType === 'telegram' && (
+                  <div>
+                    <label className="label" style={{ fontSize: '0.85rem' }}>رابط منشور أو فيديو التليجرام (Telegram URL)</label>
+                    <input
+                      className="input-field"
+                      value={form.videoUrl}
+                      onChange={e => setForm({ ...form, videoUrl: e.target.value })}
+                      placeholder="مثال: https://t.me/channel_name/123"
+                      dir="ltr"
+                    />
+                  </div>
+                )}
+
+                {form.videoType === 'external' && (
+                  <div>
+                    <label className="label" style={{ fontSize: '0.85rem' }}>رابط الفيديو الخارجي (External Video URL)</label>
+                    <input
+                      className="input-field"
+                      value={form.videoUrl}
+                      onChange={e => setForm({ ...form, videoUrl: e.target.value })}
+                      placeholder="https://example.com/video.mp4"
+                      dir="ltr"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* File Source Selector */}
+              <div className="form-group" style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
+                  <FileText size={18} style={{ color: 'var(--accent-primary)' }} />
+                  الملفات والمذكرات المرفقة
+                </label>
+                <select
+                  className="input-field"
+                  value={form.fileType || 'pdf'}
+                  onChange={e => setForm({ ...form, fileType: e.target.value })}
+                  style={{ marginBottom: '1rem' }}
+                >
+                  <option value="pdf">📄 رفع ملف PDF أو رابط مباشر</option>
+                  <option value="drive">📁 Google Drive (رابط جوجل درايف)</option>
+                  <option value="external">🌐 رابط ملف خارجي (Dropbox / OneDrive / المباشر)</option>
+                </select>
+
+                {form.fileType === 'pdf' ? (
+                  <div>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <input
+                        className="input-field"
+                        value={form.pdfUrl}
+                        onChange={e => setForm({ ...form, pdfUrl: e.target.value })}
+                        placeholder="https://... أو سيتم تعبئته تلقائياً عند رفع ملف"
+                        dir="ltr"
+                        style={{ flex: 1 }}
+                      />
+                      <label 
+                        className="btn-secondary" 
+                        style={{ 
+                          display: 'inline-flex', alignItems: 'center', gap: '0.3rem', 
+                          cursor: 'pointer', padding: '0.6rem 1rem', borderRadius: '8px', 
+                          fontSize: '0.9rem', whiteSpace: 'nowrap', border: '1px solid var(--border-color)',
+                          margin: 0, justifyContent: 'center'
+                        }}
+                      >
+                        <span>{pdfUploading ? 'جاري الرفع...' : 'رفع ملف PDF'}</span>
+                        <input 
+                          type="file" 
+                          accept="application/pdf" 
+                          onChange={handlePdfUpload} 
+                          disabled={pdfUploading}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                    {pdfUploadError && <small style={{ color: '#ef4444', display: 'block', marginTop: '0.2rem' }}>{pdfUploadError}</small>}
+                  </div>
+                ) : (
+                  <div>
+                    <label className="label" style={{ fontSize: '0.85rem' }}>
+                      {form.fileType === 'drive' ? 'رابط ملف Google Drive' : 'رابط الملف الخارجي'}
+                    </label>
+                    <input
+                      className="input-field"
+                      value={form.fileUrl}
+                      onChange={e => setForm({ ...form, fileUrl: e.target.value })}
+                      placeholder={form.fileType === 'drive' ? "مثال: https://drive.google.com/file/d/FILE_ID/view?usp=sharing" : "https://example.com/file.pdf"}
+                      dir="ltr"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="form-check">

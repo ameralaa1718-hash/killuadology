@@ -18,6 +18,11 @@ const lessonSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  videoType: {
+    type: String,
+    enum: ['bunny', 'youtube', 'telegram', 'external'],
+    default: 'bunny'
+  },
   bunnyVideoId: {
     type: String,
     default: '' // Bunny Stream Video ID (optional until uploaded)
@@ -26,9 +31,22 @@ const lessonSchema = new mongoose.Schema({
     type: String,
     default: '' // Bunny Stream Library ID (optional)
   },
+  videoUrl: {
+    type: String,
+    default: '' // YouTube, Telegram, or External video URL
+  },
+  fileType: {
+    type: String,
+    enum: ['pdf', 'drive', 'external'],
+    default: 'pdf'
+  },
   pdfUrl: {
     type: String,
     default: ''
+  },
+  fileUrl: {
+    type: String,
+    default: '' // Google Drive or external file URL
   },
   isFreePreview: {
     type: Boolean,

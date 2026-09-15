@@ -160,113 +160,195 @@ const LessonView = () => {
                 <h3 style={{ margin: 0, marginBottom: '1rem' }}>⚠️ تنبيه أمني</h3>
                 <p style={{ margin: 0 }}>تم الكشف عن محاولة تعديل مكونات الصفحة أو إخفاء العلامة المائية. تم إيقاف الفيديو لأسباب تتعلق بحماية حقوق الملكية الفكرية.</p>
               </div>
-            ) : lesson.bunnyVideoId ? (
-              <div 
-                id="video-container" 
-                className="video-cinema-frame"
-              >
-                {/* Blur Overlay when tab is inactive / blurred */}
-                {!isFocused && (
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    backdropFilter: 'blur(10px)',
-                    zIndex: 20,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    textAlign: 'center',
-                    padding: '1rem',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => setIsFocused(true)}
-                  >
-                    <PlayCircle size={48} style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }} />
-                    <h4 style={{ margin: '0 0 0.5rem 0' }}>تم إيقاف الفيديو مؤقتاً</h4>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>يرجى الضغط هنا أو العودة للصفحة لاستكمال المشاهدة</p>
-                  </div>
-                )}
+            ) : (() => {
+              const vType = lesson.videoType || (lesson.bunnyVideoId ? 'bunny' : lesson.videoUrl?.includes('youtube') || lesson.videoUrl?.includes('youtu.be') ? 'youtube' : lesson.videoUrl?.includes('t.me') ? 'telegram' : lesson.videoUrl ? 'external' : 'bunny');
 
-                <iframe 
-                  src={`https://iframe.mediadelivery.net/embed/${lesson.bunnyLibraryId || import.meta.env.VITE_BUNNY_LIBRARY_ID || 'YOUR_LIBRARY_ID'}/${lesson.bunnyVideoId}?autoplay=false`}
-                  loading="lazy" 
-                  style={{ 
-                    border: 'none', 
-                    position: 'absolute', 
-                    top: 0, 
-                    left: 0, 
-                    width: '100%', 
-                    height: '100%', 
-                    borderRadius: '8px',
-                    filter: !isFocused ? 'blur(12px)' : 'none',
-                    transition: 'filter 0.3s ease'
-                  }} 
-                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;" 
-                  allowFullScreen
-                ></iframe>
-
-                {/* Floating Watermark */}
-                {user && (
-                  <div 
-                    id="video-watermark" 
-                    style={{
-                      position: 'absolute',
-                      top: watermarkPos.top,
-                      left: watermarkPos.left,
-                      color: 'rgba(255, 255, 255, 0.22)',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.9)',
-                      pointerEvents: 'none',
-                      userSelect: 'none',
-                      zIndex: 10,
-                      fontSize: '0.95rem',
-                      fontWeight: 'bold',
-                      direction: 'ltr',
-                      transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    🔒 {user.fullName} - {user.phoneNumber || user.email}
+              // 1. Bunny Stream
+              if (vType === 'bunny' && lesson.bunnyVideoId) {
+                return (
+                  <div id="video-container" className="video-cinema-frame">
+                    {!isFocused && (
+                      <div 
+                        style={{
+                          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+                          zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                          justifyContent: 'center', color: '#fff', textAlign: 'center', padding: '1rem', cursor: 'pointer'
+                        }}
+                        onClick={() => setIsFocused(true)}
+                      >
+                        <PlayCircle size={48} style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }} />
+                        <h4 style={{ margin: '0 0 0.5rem 0' }}>تم إيقاف الفيديو مؤقتاً</h4>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>يرجى الضغط هنا أو العودة للصفحة لاستكمال المشاهدة</p>
+                      </div>
+                    )}
+                    <iframe 
+                      src={`https://iframe.mediadelivery.net/embed/${lesson.bunnyLibraryId || import.meta.env.VITE_BUNNY_LIBRARY_ID || 'YOUR_LIBRARY_ID'}/${lesson.bunnyVideoId}?autoplay=false`}
+                      loading="lazy" 
+                      style={{ 
+                        border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', 
+                        borderRadius: '8px', filter: !isFocused ? 'blur(12px)' : 'none', transition: 'filter 0.3s ease'
+                      }} 
+                      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;" 
+                      allowFullScreen
+                    ></iframe>
+                    {user && (
+                      <div 
+                        id="video-watermark" 
+                        style={{
+                          position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
+                          color: 'rgba(255, 255, 255, 0.22)', textShadow: '1px 1px 2px rgba(0,0,0,0.9)',
+                          pointerEvents: 'none', userSelect: 'none', zIndex: 10, fontSize: '0.95rem',
+                          fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        🔒 {user.fullName} - {user.phoneNumber || user.email}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
-                <PlayCircle size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                <h3>لا يوجد فيديو مرفوع لهذه المحاضرة حالياً</h3>
-              </div>
-            )}
+                );
+              }
+
+              // 2. YouTube Video
+              if (vType === 'youtube' && lesson.videoUrl) {
+                let embedUrl = lesson.videoUrl;
+                const match = lesson.videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+                if (match && match[1]) {
+                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1`;
+                }
+                return (
+                  <div className="video-cinema-frame">
+                    <iframe 
+                      src={embedUrl}
+                      loading="lazy"
+                      style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                );
+              }
+
+              // 3. Telegram Video
+              if (vType === 'telegram' && lesson.videoUrl) {
+                const embedUrl = lesson.videoUrl.endsWith('?embed=1') ? lesson.videoUrl : `${lesson.videoUrl.split('?')[0]}?embed=1`;
+                return (
+                  <div>
+                    <div className="video-cinema-frame" style={{ marginBottom: '1.5rem' }}>
+                      <iframe 
+                        src={embedUrl}
+                        style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <a href={lesson.videoUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                        <span>فتح الفيديو في تطبيق Telegram ✈️</span>
+                      </a>
+                    </div>
+                  </div>
+                );
+              }
+
+              // 4. External Video
+              if (vType === 'external' && lesson.videoUrl) {
+                const isDirectVideo = lesson.videoUrl.endsWith('.mp4') || lesson.videoUrl.endsWith('.webm') || lesson.videoUrl.endsWith('.ogg');
+                return (
+                  <div className="video-cinema-frame">
+                    {isDirectVideo ? (
+                      <video 
+                        src={lesson.videoUrl} 
+                        controls 
+                        controlsList="nodownload"
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                      />
+                    ) : (
+                      <iframe 
+                        src={lesson.videoUrl}
+                        style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                        allowFullScreen
+                      ></iframe>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
+                  <PlayCircle size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                  <h3>لا يوجد فيديو مرفوع لهذه المحاضرة حالياً</h3>
+                </div>
+              );
+            })()}
           </div>
         )}
 
         {activeTab === 'files' && (
           <div>
-            {lesson.pdfUrl ? (
-              <div className="pdf-download-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-                  <div className="pdf-icon-wrapper">
-                    <FileText size={28} />
+            {(() => {
+              const fUrl = lesson.fileUrl || lesson.pdfUrl;
+              const isDrive = lesson.fileType === 'drive' || (fUrl && fUrl.includes('drive.google.com'));
+
+              if (!fUrl) {
+                return (
+                  <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
+                    <FileText size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                    <h3>لا توجد ملفات مرفقة بهذه المحاضرة حالياً</h3>
                   </div>
+                );
+              }
+
+              if (isDrive) {
+                let previewUrl = fUrl;
+                if (fUrl.includes('/view')) {
+                  previewUrl = fUrl.replace('/view', '/preview');
+                }
+                return (
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1.15rem' }}>مذكرة المحاضرة (PDF)</h3>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>اضغط للتحميل أو عرض المذكرة</p>
+                    <div className="pdf-download-card" style={{ marginBottom: '1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                        <div className="pdf-icon-wrapper" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                          <FileText size={28} />
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.15rem' }}>ملف Google Drive</h3>
+                          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>اضغط للفتح المباشر في جوجل درايف</p>
+                        </div>
+                      </div>
+                      <a href={fUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none' }}>
+                        فتح في Google Drive 📁
+                      </a>
+                    </div>
+
+                    <div style={{ height: '550px', width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                      <iframe 
+                        src={previewUrl} 
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                        allow="autoplay"
+                      ></iframe>
+                    </div>
                   </div>
+                );
+              }
+
+              return (
+                <div className="pdf-download-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                    <div className="pdf-icon-wrapper">
+                      <FileText size={28} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.15rem' }}>مذكرة / ملف المحاضرة</h3>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>اضغط للتحميل أو عرض الملف</p>
+                    </div>
+                  </div>
+                  <a href={fUrl.startsWith('http') ? fUrl : `${axios.defaults.baseURL || 'http://localhost:5000'}${fUrl}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none' }}>
+                    فتح الملف
+                  </a>
                 </div>
-                <a href={lesson.pdfUrl.startsWith('http') ? lesson.pdfUrl : `${axios.defaults.baseURL || 'http://localhost:5000'}${lesson.pdfUrl}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none' }}>
-                  فتح الملف
-                </a>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
-                <FileText size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                <h3>لا توجد ملفات مرفقة بهذه المحاضرة حالياً</h3>
-              </div>
-            )}
+              );
+            })()}
           </div>
         )}
 

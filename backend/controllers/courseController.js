@@ -135,7 +135,9 @@ export const getCourseLessons = async (req, res) => {
         if (isQuizLocked) {
           delete lessonObj.bunnyVideoId;
           delete lessonObj.bunnyLibraryId;
+          delete lessonObj.videoUrl;
           delete lessonObj.pdfUrl;
+          delete lessonObj.fileUrl;
         }
 
         // Hide correct answers from student view to prevent client-side inspection cheats
@@ -151,7 +153,9 @@ export const getCourseLessons = async (req, res) => {
         // Hide sensitive info
         delete lessonObj.bunnyVideoId;
         delete lessonObj.bunnyLibraryId;
+        delete lessonObj.videoUrl;
         delete lessonObj.pdfUrl;
+        delete lessonObj.fileUrl;
         delete lessonObj.quiz;
         return lessonObj;
       }
