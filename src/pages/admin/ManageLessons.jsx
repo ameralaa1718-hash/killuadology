@@ -17,6 +17,8 @@ const emptyForm = {
   quizEnabled: false,
   quiz: {
     title: '',
+    isRequired: false,
+    passPercentage: 50,
     questions: []
   }
 };
@@ -106,7 +108,7 @@ const ManageLessons = () => {
       isFreePreview: lesson.isFreePreview,
       price: lesson.price || 0,
       quizEnabled: !!(lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0),
-      quiz: lesson.quiz || { title: '', questions: [] }
+      quiz: lesson.quiz || { title: '', isRequired: false, passPercentage: 50, questions: [] }
     });
     setShowForm(true);
     setMsg('');
@@ -349,10 +351,45 @@ const ManageLessons = () => {
                         value={form.quiz?.title || ''}
                         onChange={e => setForm({
                           ...form,
-                          quiz: { ...(form.quiz || { title: '', questions: [] }), title: e.target.value }
+                          quiz: { ...(form.quiz || { title: '', isRequired: false, passPercentage: 50, questions: [] }), title: e.target.value }
                         })}
                         placeholder="مثال: اختبار تقييمي للمحاضرة الأولى"
                       />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.15)', borderRadius: '6px' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={form.quiz?.isRequired || false}
+                            onChange={e => setForm({
+                              ...form,
+                              quiz: { ...(form.quiz || { title: '', passPercentage: 50, questions: [] }), isRequired: e.target.checked }
+                            })}
+                          />
+                          🔒 الكويز إلزامي لفتح الفيديو والملفات
+                        </label>
+                        <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          لن يتمكن الطالب من فتح المحاضرة إلا بعد اجتياز الكويز.
+                        </p>
+                      </div>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="label" style={{ fontSize: '0.85rem' }}>نسبة النجاح المطلوبة (%)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          className="input-field"
+                          value={form.quiz?.passPercentage ?? 50}
+                          onChange={e => setForm({
+                            ...form,
+                            quiz: { ...(form.quiz || { title: '', isRequired: false, questions: [] }), passPercentage: Math.max(1, Math.min(100, Number(e.target.value))) }
+                          })}
+                          style={{ padding: '0.4rem 0.75rem' }}
+                        />
+                      </div>
                     </div>
 
                     <div style={{ marginTop: '1.5rem' }}>
@@ -521,8 +558,8 @@ const ManageLessons = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                           <span style={{ fontWeight: 600 }}>{lesson.title}</span>
                           {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
-                            <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'var(--accent-glow)', borderColor: 'var(--accent-primary)', borderWidth: '1px', borderStyle: 'solid', color: 'var(--accent-primary)', padding: '0.1rem 0.5rem' }}>
-                              📝 اختبار ({lesson.quiz.questions.length} أسئلة)
+                            <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: lesson.quiz.isRequired ? 'rgba(239, 68, 68, 0.15)' : 'var(--accent-glow)', borderColor: lesson.quiz.isRequired ? '#ef4444' : 'var(--accent-primary)', borderWidth: '1px', borderStyle: 'solid', color: lesson.quiz.isRequired ? '#ef4444' : 'var(--accent-primary)', padding: '0.1rem 0.5rem' }}>
+                              {lesson.quiz.isRequired ? `🔒 كويز إلزامي (${lesson.quiz.passPercentage || 50}%)` : `📝 اختبار (${lesson.quiz.questions.length} أسئلة)`}
                             </span>
                           )}
                         </div>

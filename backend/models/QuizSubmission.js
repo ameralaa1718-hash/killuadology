@@ -31,6 +31,10 @@ const quizSubmissionSchema = new mongoose.Schema({
   percentage: {
     type: Number,
     required: true
+  },
+  passed: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 

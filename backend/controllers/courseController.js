@@ -62,8 +62,9 @@ export const getCourseLessons = async (req, res) => {
     let coursePurchased = course.price === 0;
     let subjectPurchased = false;
     let approvedLessons = [];
+    let userSubmissionsMap = {};
 
-    // Check access
+    // Check access & quiz submissions
     if (req.user) {
       if (req.user.role === 'admin') {
         coursePurchased = true;
@@ -103,16 +104,40 @@ export const getCourseLessons = async (req, res) => {
           });
           approvedLessons = lessonPurchases.map(p => p.lesson.toString());
         }
+
+        // 4. Fetch student quiz submissions for these lessons
+        const submissions = await QuizSubmission.find({
+          student: req.user._id,
+          lesson: { $in: lessons.map(l => l._id) }
+        });
+        submissions.forEach(sub => {
+          userSubmissionsMap[sub.lesson.toString()] = sub;
+        });
       }
     }
 
-    // Filter lessons to hide secure content if no access
+    // Filter lessons to hide secure content if no access or if locked by prerequisite quiz
     const filteredLessons = lessons.map(lesson => {
       const hasAccess = coursePurchased || subjectPurchased || approvedLessons.includes(lesson._id.toString()) || lesson.isFreePreview || (req.user && req.user.role === 'admin');
       const lessonObj = lesson.toObject();
       lessonObj.hasAccess = hasAccess;
 
+      const quizRequired = !!(lessonObj.quiz && lessonObj.quiz.questions && lessonObj.quiz.questions.length > 0 && lessonObj.quiz.isRequired);
+      const passPercentage = lessonObj.quiz?.passPercentage || 50;
+      const userSubmission = userSubmissionsMap[lesson._id.toString()];
+      const hasPassedQuiz = userSubmission ? (userSubmission.percentage >= passPercentage) : false;
+
+      const isQuizLocked = quizRequired && !hasPassedQuiz && (!req.user || req.user.role !== 'admin');
+      lessonObj.isLockedByQuiz = isQuizLocked;
+      lessonObj.hasPassedQuiz = hasPassedQuiz;
+
       if (hasAccess) {
+        if (isQuizLocked) {
+          delete lessonObj.bunnyVideoId;
+          delete lessonObj.bunnyLibraryId;
+          delete lessonObj.pdfUrl;
+        }
+
         // Hide correct answers from student view to prevent client-side inspection cheats
         if (lessonObj.quiz && lessonObj.quiz.questions && (!req.user || req.user.role !== 'admin')) {
           lessonObj.quiz.questions = lessonObj.quiz.questions.map(q => {
@@ -147,16 +172,18 @@ export const submitQuiz = async (req, res) => {
     const { lessonId, courseId } = req.params;
     const studentId = req.user._id;
 
-    // 1. Check if user already submitted
-    const existingSubmission = await QuizSubmission.findOne({ student: studentId, lesson: lessonId });
-    if (existingSubmission) {
-      return res.status(400).json({ message: 'لقد قمت بتسليم هذا الاختبار بالفعل ولا يمكن إعادته.' });
-    }
-
-    // 2. Fetch full lesson with correct answers from DB
+    // 1. Fetch full lesson with correct answers from DB
     const lesson = await Lesson.findById(lessonId);
     if (!lesson || !lesson.quiz || !lesson.quiz.questions || lesson.quiz.questions.length === 0) {
       return res.status(404).json({ message: 'لا يوجد اختبار لهذه المحاضرة' });
+    }
+
+    const passPercentage = lesson.quiz.passPercentage || 50;
+
+    // 2. Check existing submission
+    const existingSubmission = await QuizSubmission.findOne({ student: studentId, lesson: lessonId });
+    if (existingSubmission && existingSubmission.percentage >= passPercentage) {
+      return res.status(400).json({ message: 'لقد قمت باجتياز هذا الاختبار بالفعل بنجاح ولا داعي لإعادته.' });
     }
 
     const questions = lesson.quiz.questions;
@@ -172,24 +199,36 @@ export const submitQuiz = async (req, res) => {
 
     const totalQuestions = questions.length;
     const percentage = Math.round((score / totalQuestions) * 100);
+    const passed = percentage >= passPercentage;
 
-    // 4. Save submission
-    const submission = new QuizSubmission({
-      student: studentId,
-      lesson: lessonId,
-      course: courseId,
-      answers,
+    let submission;
+    if (existingSubmission) {
+      existingSubmission.answers = answers;
+      existingSubmission.score = score;
+      existingSubmission.totalQuestions = totalQuestions;
+      existingSubmission.percentage = percentage;
+      existingSubmission.passed = passed;
+      submission = await existingSubmission.save();
+    } else {
+      submission = new QuizSubmission({
+        student: studentId,
+        lesson: lessonId,
+        course: courseId,
+        answers,
+        score,
+        totalQuestions,
+        percentage,
+        passed
+      });
+      await submission.save();
+    }
+
+    res.status(200).json({
       score,
       totalQuestions,
-      percentage
-    });
-
-    await submission.save();
-
-    res.status(201).json({
-      score,
-      totalQuestions,
-      percentage
+      percentage,
+      passPercentage,
+      passed
     });
   } catch (error) {
     res.status(500).json({ message: error.message || 'خطأ أثناء تسليم الاختبار' });
@@ -205,7 +244,7 @@ export const getMyQuizSubmission = async (req, res) => {
     const studentId = req.user._id;
 
     const submission = await QuizSubmission.findOne({ student: studentId, lesson: lessonId })
-      .select('score totalQuestions percentage createdAt');
+      .select('score totalQuestions percentage passed createdAt');
 
     res.json(submission); // Returns submission or null
   } catch (error) {

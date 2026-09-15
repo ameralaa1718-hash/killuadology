@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowRight, PlayCircle, FileText, ClipboardList, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowRight, PlayCircle, FileText, ClipboardList, CheckCircle2, AlertCircle, Lock, RefreshCw } from 'lucide-react';
 import './Lectures.css'; // Reuse styles
 import './LessonView.css';
 
@@ -23,213 +23,53 @@ const LessonView = () => {
   const [submittingQuiz, setSubmittingQuiz] = useState(false);
   const [quizError, setQuizError] = useState('');
 
-  // 1. Watermark Random Position
-  useEffect(() => {
-    if (isTampered || !lesson?.bunnyVideoId) return;
-
-    const interval = setInterval(() => {
-      const top = Math.floor(Math.random() * 75) + 10; // 10% to 85%
-      const left = Math.floor(Math.random() * 55) + 10; // 10% to 65%
-      setWatermarkPos({ top: `${top}%`, left: `${left}%` });
-    }, 8000); // changes every 8 seconds
-
-    return () => clearInterval(interval);
-  }, [lesson, isTampered]);
-
-  // 2. Disable Right Click & Inspect shortcuts
-  useEffect(() => {
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-    };
-
-    const handleKeyDown = (e) => {
-      // Disable F12
-      if (e.keyCode === 123) {
-        e.preventDefault();
-        return false;
-      }
-      // Disable Ctrl+Shift+I, J, C
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
-        e.preventDefault();
-        return false;
-      }
-      // Disable Ctrl+U
-      if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
-        e.preventDefault();
-        return false;
-      }
-    };
-
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
-  // 3. Tab Visibility & Focus detection
-  useEffect(() => {
-    const handleFocus = () => setIsFocused(true);
-    
-    const handleBlur = () => {
-      // Use a timeout because the transition to fullscreen takes some milliseconds.
-      // Checking immediately might return false for isFullscreen.
-      setTimeout(() => {
-        const isFullscreen = !!(
-          document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement ||
-          document.msFullscreenElement ||
-          document.webkitCurrentFullScreenElement
-        );
-        // Only trigger blur overlay/filter if the document actually lost focus completely
-        // and we are NOT in fullscreen mode.
-        if (!document.hasFocus() && !isFullscreen) {
-          setIsFocused(false);
-        }
-      }, 250);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setIsFocused(false);
-      } else {
-        setIsFocused(true);
-      }
-    };
-
-    const handleFullscreenChange = () => {
-      const isFullscreen = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        document.webkitCurrentFullScreenElement
-      );
-      if (isFullscreen) {
-        setIsFocused(true);
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Listen to fullscreen changes
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+  const fetchData = async () => {
+    try {
+      setSelectedAnswers({});
+      setQuizError('');
+      const config = user ? { headers: { Authorization: `Bearer ${user.token}` } } : {};
       
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
-    };
-  }, []);
+      // Fetch course details
+      const coursesRes = await axios.get('/api/courses');
+      const foundCourse = coursesRes.data.find(c => c._id === courseId);
+      setCourse(foundCourse);
 
-  // 4. Anti-Tampering Observer
-  useEffect(() => {
-    if (isTampered || !lesson?.bunnyVideoId) return;
-
-    const watermarkEl = document.getElementById('video-watermark');
-    const containerEl = document.getElementById('video-container');
-
-    if (!watermarkEl || !containerEl) return;
-
-    const callback = (mutationsList) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-          const watermarkStillExists = document.getElementById('video-watermark');
-          if (!watermarkStillExists) {
-            setIsTampered(true);
-            break;
-          }
-        } else if (mutation.type === 'attributes') {
-          const el = document.getElementById('video-watermark');
-          if (el) {
-            const style = window.getComputedStyle(el);
-            if (
-              style.display === 'none' ||
-              style.visibility === 'hidden' ||
-              parseFloat(style.opacity) < 0.05 ||
-              style.position !== 'absolute' ||
-              style.pointerEvents !== 'none'
-            ) {
-              setIsTampered(true);
-              break;
-            }
-          }
+      // Fetch lessons and find the specific one
+      const lessonsRes = await axios.get(`/api/courses/${courseId}/lessons`, config);
+      const foundLesson = lessonsRes.data.find(l => l._id === lessonId);
+      
+      if (foundLesson && foundLesson.hasAccess) {
+        setLesson(foundLesson);
+        
+        // If lesson is locked by quiz, force active tab to quiz
+        if (foundLesson.isLockedByQuiz) {
+          setActiveTab('quiz');
         }
+
+        // Check for quiz submission if quiz exists
+        if (foundLesson.quiz && foundLesson.quiz.questions && foundLesson.quiz.questions.length > 0) {
+          try {
+            const subRes = await axios.get(`/api/courses/${courseId}/lessons/${lessonId}/quiz/my-submission`, config);
+            setMySubmission(subRes.data);
+          } catch (e) {
+            console.error("Error loading quiz submission:", e);
+          }
+        } else {
+          setMySubmission(null);
+        }
+      } else {
+        // Lesson not found or no access
+        navigate(`/course/${courseId}`);
       }
-    };
-
-    const observer = new MutationObserver(callback);
-    
-    observer.observe(containerEl, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-      attributeFilter: ['style', 'class', 'hidden']
-    });
-
-    observerRef.current = observer;
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [lesson, isTampered]);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      navigate(`/course/${courseId}`);
+    }
+  };
 
   useEffect(() => {
     if (authLoading) return;
-    const fetchData = async () => {
-      try {
-        setSelectedAnswers({});
-        setQuizError('');
-        const config = user ? { headers: { Authorization: `Bearer ${user.token}` } } : {};
-        
-        // Fetch course details
-        const coursesRes = await axios.get('/api/courses');
-        const foundCourse = coursesRes.data.find(c => c._id === courseId);
-        setCourse(foundCourse);
-
-        // Fetch lessons and find the specific one
-        const lessonsRes = await axios.get(`/api/courses/${courseId}/lessons`, config);
-        const foundLesson = lessonsRes.data.find(l => l._id === lessonId);
-        
-        if (foundLesson && foundLesson.hasAccess) {
-          setLesson(foundLesson);
-          
-          // Check for quiz submission if quiz exists
-          if (foundLesson.quiz && foundLesson.quiz.questions && foundLesson.quiz.questions.length > 0) {
-            try {
-              const subRes = await axios.get(`/api/courses/${courseId}/lessons/${lessonId}/quiz/my-submission`, config);
-              setMySubmission(subRes.data);
-            } catch (e) {
-              console.error("Error loading quiz submission:", e);
-            }
-          } else {
-            setMySubmission(null);
-          }
-        } else {
-          // Lesson not found or no access
-          navigate(`/course/${courseId}`);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        navigate(`/course/${courseId}`);
-      }
-    };
     fetchData();
   }, [courseId, lessonId, user, navigate, authLoading]);
 
@@ -247,19 +87,52 @@ const LessonView = () => {
         {lesson.description && <p>{lesson.description}</p>}
       </div>
 
+      {/* Prerequisite Quiz Lock Notice */}
+      {lesson.isLockedByQuiz && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          padding: '1.2rem 1.5rem',
+          background: 'rgba(239, 68, 68, 0.12)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          marginBottom: '2rem',
+          color: '#f87171'
+        }}>
+          <Lock size={32} style={{ flexShrink: 0 }} />
+          <div>
+            <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', color: '#ef4444' }}>
+              🔒 هذه المحاضرة محمية باختبار إلزامي
+            </h4>
+            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+              يجب عليك الإجابة على الكويز أدناه والحصول على نسبة <strong>%{lesson.quiz?.passPercentage || 50}</strong> على الأقل لفتح فيديو المحاضرة والملفات المرفقة.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="tabs-segmented-control">
         <button 
-          onClick={() => setActiveTab('video')}
+          onClick={() => {
+            if (!lesson.isLockedByQuiz) setActiveTab('video');
+          }}
+          disabled={lesson.isLockedByQuiz}
+          style={{ opacity: lesson.isLockedByQuiz ? 0.5 : 1, cursor: lesson.isLockedByQuiz ? 'not-allowed' : 'pointer' }}
           className={`tab-segmented-button ${activeTab === 'video' ? 'active' : ''}`}
         >
-          <PlayCircle size={20} /> فيديو المحاضرة
+          {lesson.isLockedByQuiz ? <Lock size={18} /> : <PlayCircle size={20} />} فيديو المحاضرة
         </button>
         <button 
-          onClick={() => setActiveTab('files')}
+          onClick={() => {
+            if (!lesson.isLockedByQuiz) setActiveTab('files');
+          }}
+          disabled={lesson.isLockedByQuiz}
+          style={{ opacity: lesson.isLockedByQuiz ? 0.5 : 1, cursor: lesson.isLockedByQuiz ? 'not-allowed' : 'pointer' }}
           className={`tab-segmented-button ${activeTab === 'files' ? 'active' : ''}`}
         >
-          <FileText size={20} /> الملفات والمذكرات
+          {lesson.isLockedByQuiz ? <Lock size={18} /> : <FileText size={20} />} الملفات والمذكرات
         </button>
         {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
           <button 
@@ -401,28 +274,54 @@ const LessonView = () => {
           <div>
             {mySubmission ? (
               /* Results View */
-              <div className="glass-card" style={{ maxWidth: '600px', margin: '1.5rem auto', padding: '2.5rem 2rem', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-                <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', background: mySubmission.percentage >= 50 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: mySubmission.percentage >= 50 ? '#10b981' : '#ef4444', marginBottom: '1.5rem' }}>
-                  <CheckCircle2 size={48} />
-                </div>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>تم تسليم اختبار المحاضرة بنجاح!</h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: '0 0 2rem 0' }}>لقد قمت بإتمام هذا التقييم مسبقاً، وإليك النتيجة المحققة:</p>
-                
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-                  <div style={{ padding: '1rem 2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)', minWidth: '130px' }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>الدرجة المحققة</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent-primary)' }}>{mySubmission.score} <span style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', fontWeight: 500 }}>/ {mySubmission.totalQuestions}</span></div>
-                  </div>
-                  <div style={{ padding: '1rem 2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)', minWidth: '130px' }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>النسبة المئوية</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 800, color: mySubmission.percentage >= 50 ? '#10b981' : '#ef4444' }}>%{mySubmission.percentage}</div>
-                  </div>
-                </div>
+              (() => {
+                const reqPass = lesson.quiz?.passPercentage || 50;
+                const passed = mySubmission.percentage >= reqPass;
+                return (
+                  <div className="glass-card" style={{ maxWidth: '600px', margin: '1.5rem auto', padding: '2.5rem 2rem', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+                    <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', background: passed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: passed ? '#10b981' : '#ef4444', marginBottom: '1.5rem' }}>
+                      {passed ? <CheckCircle2 size={48} /> : <AlertCircle size={48} />}
+                    </div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>
+                      {passed ? '🎉 مبروك! لقد اجتزت الاختبار بنجاح' : '❌ للأسف لم تتخطَّ درجة النجاح المطلوبة'}
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: '0 0 2rem 0' }}>
+                      {passed 
+                        ? 'تم فتح فيديو المحاضرة والملفات المرفقة بنجاح!' 
+                        : `درجة النجاح المطلوبة لفتح المحاضرة هي %${reqPass}. يمكنك إعادة المحاولة حتى تنجح.`}
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+                      <div style={{ padding: '1rem 2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)', minWidth: '130px' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>الدرجة المحققة</div>
+                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent-primary)' }}>{mySubmission.score} <span style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', fontWeight: 500 }}>/ {mySubmission.totalQuestions}</span></div>
+                      </div>
+                      <div style={{ padding: '1rem 2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)', minWidth: '130px' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>النسبة المئوية</div>
+                        <div style={{ fontSize: '2rem', fontWeight: 800, color: passed ? '#10b981' : '#ef4444' }}>%{mySubmission.percentage}</div>
+                      </div>
+                    </div>
 
-                <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px dashed var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  🔒 هذا التقييم معتمد ومغلق تلقائياً. لا يمكن إعادة تقديم الإجابات. بالتوفيق دائماً!
-                </div>
-              </div>
+                    {passed ? (
+                      <button 
+                        onClick={() => setActiveTab('video')} 
+                        className="btn-primary" 
+                        style={{ padding: '0.8rem 2.5rem', fontSize: '1.1rem', fontWeight: 600, borderRadius: '12px' }}
+                      >
+                        <PlayCircle size={20} style={{ marginLeft: '0.5rem' }} /> مشاهدة المحاضرة الآن
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => { setMySubmission(null); setSelectedAnswers({}); setQuizError(''); }} 
+                        className="btn-primary" 
+                        style={{ padding: '0.8rem 2.5rem', fontSize: '1.1rem', fontWeight: 600, borderRadius: '12px', backgroundColor: '#ef4444' }}
+                      >
+                        <RefreshCw size={20} style={{ marginLeft: '0.5rem' }} /> إعادة الاختبار الآن
+                      </button>
+                    )}
+                  </div>
+                );
+              })()
             ) : (
               /* Quiz Question Form */
               <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -433,6 +332,11 @@ const LessonView = () => {
                   </h2>
                   <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0', fontSize: '0.95rem' }}>
                     الرجاء قراءة كل سؤال بعناية وتحديد الإجابة الأكثر ملاءمة. يجب الإجابة عن كافة الأسئلة لتتمكن من تسليم الاختبار.
+                    {lesson.quiz.isRequired && (
+                      <strong style={{ display: 'block', marginTop: '0.4rem', color: '#f87171' }}>
+                        🔒 كويز إلزامي: يتطلب الحصول على نسبة %{lesson.quiz.passPercentage || 50} على الأقل لفتح المحاضرة.
+                      </strong>
+                    )}
                   </p>
                 </div>
 
@@ -493,6 +397,10 @@ const LessonView = () => {
                         }));
                         const { data } = await axios.post(`/api/courses/${courseId}/lessons/${lessonId}/quiz/submit`, { answers: formattedAnswers }, config);
                         setMySubmission(data);
+                        if (data.passed) {
+                          await fetchData();
+                          setActiveTab('video');
+                        }
                       } catch (err) {
                         setQuizError(err.response?.data?.message || 'فشل في تسليم الاختبار. يرجى المحاولة مرة أخرى.');
                       } finally {
