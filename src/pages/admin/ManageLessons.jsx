@@ -657,58 +657,61 @@ const ManageLessons = () => {
                 <tr>
                   <th>#</th>
                   <th>عنوان المحاضرة</th>
-                  <th>Bunny Video ID</th>
-                  <th>PDF</th>
+                  <th>فيديو المحاضرة</th>
+                  <th>الملفات المرفقة</th>
                   <th>النوع</th>
                   <th>إجراءات</th>
                 </tr>
               </thead>
               <tbody>
-                {lessons.map((lesson) => (
-                  <tr key={lesson._id}>
-                    <td style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>{lesson.order}</td>
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontWeight: 600 }}>{lesson.title}</span>
-                          {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
-                            <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: lesson.quiz.isRequired ? 'rgba(239, 68, 68, 0.15)' : 'var(--accent-glow)', borderColor: lesson.quiz.isRequired ? '#ef4444' : 'var(--accent-primary)', borderWidth: '1px', borderStyle: 'solid', color: lesson.quiz.isRequired ? '#ef4444' : 'var(--accent-primary)', padding: '0.1rem 0.5rem' }}>
-                              {lesson.quiz.isRequired ? `🔒 كويز إلزامي (${lesson.quiz.passPercentage || 50}%)` : `📝 اختبار (${lesson.quiz.questions.length} أسئلة)`}
-                            </span>
+                {lessons.map((lesson) => {
+                  const videoUrl = lesson.videoUrl || '';
+                  const fileUrl = lesson.fileUrl || lesson.pdfUrl || '';
+
+                  return (
+                    <tr key={lesson._id}>
+                      <td style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>{lesson.order}</td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 600 }}>{lesson.title}</span>
+                            {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
+                              <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: lesson.quiz.isRequired ? 'rgba(239, 68, 68, 0.15)' : 'var(--accent-glow)', borderColor: lesson.quiz.isRequired ? '#ef4444' : 'var(--accent-primary)', borderWidth: '1px', borderStyle: 'solid', color: lesson.quiz.isRequired ? '#ef4444' : 'var(--accent-primary)', padding: '0.1rem 0.5rem' }}>
+                                {lesson.quiz.isRequired ? `🔒 كويز إلزامي (${lesson.quiz.passPercentage || 50}%)` : `📝 اختبار (${lesson.quiz.questions.length} أسئلة)`}
+                              </span>
+                            )}
+                          </div>
+                          {lesson.description && (
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.1rem', marginBottom: 0 }}>
+                              {lesson.description}
+                            </p>
                           )}
                         </div>
-                        {lesson.description && (
-                          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.1rem', marginBottom: 0 }}>
-                            {lesson.description}
-                          </p>
+                      </td>
+                      <td>
+                        {lesson.bunnyVideoId ? (
+                          <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>🔒 Bunny Stream</span>
+                        ) : videoUrl.includes('youtube') || videoUrl.includes('youtu.be') ? (
+                          <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}>▶️ يوتيوب</span>
+                        ) : videoUrl.includes('t.me') ? (
+                          <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.3)' }}>✈️ تليجرام</span>
+                        ) : videoUrl.includes('drive.google') ? (
+                          <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>📁 جوجل درايف</span>
+                        ) : videoUrl ? (
+                          <span className="badge badge-info" style={{ fontSize: '0.75rem' }}>🌐 فيديو خارجي</span>
+                        ) : (
+                          <span className="badge badge-warning" style={{ fontSize: '0.75rem' }}>لا يوجد فيديو</span>
                         )}
-                      </div>
-                    </td>
-                    <td>
-                      {lesson.bunnyVideoId ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                          <span className="badge badge-success" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                            Video: {lesson.bunnyVideoId.substring(0, 12)}...
-                          </span>
-                          {lesson.bunnyLibraryId && (
-                            <span className="badge badge-info" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                              Lib: {lesson.bunnyLibraryId}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="badge badge-warning">لم يُرفع بعد</span>
-                      )}
-                    </td>
-                    <td>
-                      {lesson.pdfUrl ? (
-                        <a href={lesson.pdfUrl.startsWith('http') ? lesson.pdfUrl : `${axios.defaults.baseURL || 'http://localhost:5000'}${lesson.pdfUrl}`} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', textDecoration: 'none' }}>
-                          <FileText size={14} /> عرض
-                        </a>
-                      ) : (
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>—</span>
-                      )}
-                    </td>
+                      </td>
+                      <td>
+                        {fileUrl ? (
+                          <a href={fileUrl.startsWith('http') ? fileUrl : fileUrl} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', textDecoration: 'none' }}>
+                            <FileText size={14} /> عرض الملف
+                          </a>
+                        ) : (
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>—</span>
+                        )}
+                      </td>
                     <td>
                       {lesson.isFreePreview ? (
                         <span className="badge badge-info" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -741,7 +744,8 @@ const ManageLessons = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           </div>
