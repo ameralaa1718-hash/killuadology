@@ -131,6 +131,31 @@ const ManageLessons = () => {
     setMsg('');
     try {
       const payload = { ...form };
+
+      // Auto-correct videoType if videoUrl is set
+      if (payload.videoUrl) {
+        const url = payload.videoUrl.toLowerCase();
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+          payload.videoType = 'youtube';
+        } else if (url.includes('t.me')) {
+          payload.videoType = 'telegram';
+        } else if (url.includes('drive.google.com')) {
+          payload.videoType = 'drive';
+        } else if (payload.videoType === 'bunny' && !payload.bunnyVideoId) {
+          payload.videoType = 'external';
+        }
+      }
+
+      // Auto-correct fileType if fileUrl is set
+      if (payload.fileUrl) {
+        const url = payload.fileUrl.toLowerCase();
+        if (url.includes('drive.google.com')) {
+          payload.fileType = 'drive';
+        } else if (payload.fileType === 'pdf' && !payload.pdfUrl) {
+          payload.fileType = 'external';
+        }
+      }
+
       if (!payload.quizEnabled) {
         payload.quiz = null;
       }

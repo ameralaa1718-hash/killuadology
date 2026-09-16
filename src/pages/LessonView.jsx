@@ -164,23 +164,28 @@ const LessonView = () => {
               const rawUrl = lesson.videoUrl || '';
               let vType = lesson.videoType || 'bunny';
 
-              // Auto-detect source if videoUrl is set
+              // Check if Bunny ID looks valid
+              const isValidBunnyId = lesson.bunnyVideoId && !lesson.bunnyVideoId.includes('xxxx') && lesson.bunnyVideoId.length > 5;
+              const bunnyLibId = lesson.bunnyLibraryId || import.meta.env.VITE_BUNNY_LIBRARY_ID;
+              const hasValidBunnyLib = bunnyLibId && bunnyLibId !== 'YOUR_LIBRARY_ID';
+
+              // Auto-detect source if videoUrl is set or if Bunny ID is invalid
               if (rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be')) {
                 vType = 'youtube';
               } else if (rawUrl.includes('t.me')) {
                 vType = 'telegram';
               } else if (rawUrl.includes('drive.google.com')) {
                 vType = 'drive';
-              } else if (rawUrl && vType === 'bunny' && !lesson.bunnyVideoId) {
+              } else if (rawUrl && (!isValidBunnyId || !hasValidBunnyLib)) {
                 vType = 'external';
               }
 
-              // 1. Bunny Stream
-              if (vType === 'bunny' && lesson.bunnyVideoId) {
+              // 1. Bunny Stream (Only if valid Bunny ID & Library exist)
+              if (vType === 'bunny' && isValidBunnyId && hasValidBunnyLib) {
                 return (
                   <div id="video-container" className="video-cinema-frame">
                     <iframe 
-                      src={`https://iframe.mediadelivery.net/embed/${lesson.bunnyLibraryId || import.meta.env.VITE_BUNNY_LIBRARY_ID || 'YOUR_LIBRARY_ID'}/${lesson.bunnyVideoId}?autoplay=false`}
+                      src={`https://iframe.mediadelivery.net/embed/${bunnyLibId}/${lesson.bunnyVideoId}?autoplay=false`}
                       loading="lazy" 
                       style={{ 
                         border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', 
