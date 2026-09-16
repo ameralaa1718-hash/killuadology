@@ -82,16 +82,20 @@ export const getCourseLessonsAdmin = async (req, res) => {
 // @desc    Create a lesson for a course
 // @route   POST /api/admin/courses/:id/lessons
 export const createLesson = async (req, res) => {
-  const { title, description, order, bunnyVideoId, bunnyLibraryId, pdfUrl, isFreePreview, price, quiz } = req.body;
+  const { title, description, order, videoType, bunnyVideoId, bunnyLibraryId, videoUrl, fileType, pdfUrl, fileUrl, isFreePreview, price, quiz } = req.body;
   try {
     const lesson = new Lesson({
       course: req.params.id,
       title,
       description: description || '',
       order,
+      videoType: videoType || 'bunny',
       bunnyVideoId: bunnyVideoId || '',
       bunnyLibraryId: bunnyLibraryId || '',
+      videoUrl: videoUrl || '',
+      fileType: fileType || 'pdf',
       pdfUrl: pdfUrl || '',
+      fileUrl: fileUrl || '',
       isFreePreview: isFreePreview || false,
       price: price !== undefined ? price : 0,
       quiz: quiz || undefined
@@ -112,9 +116,13 @@ export const updateLesson = async (req, res) => {
       if (req.body.title !== undefined) lesson.title = req.body.title;
       if (req.body.description !== undefined) lesson.description = req.body.description;
       if (req.body.order !== undefined) lesson.order = req.body.order;
+      if (req.body.videoType !== undefined) lesson.videoType = req.body.videoType;
       if (req.body.bunnyVideoId !== undefined) lesson.bunnyVideoId = req.body.bunnyVideoId;
       if (req.body.bunnyLibraryId !== undefined) lesson.bunnyLibraryId = req.body.bunnyLibraryId;
+      if (req.body.videoUrl !== undefined) lesson.videoUrl = req.body.videoUrl;
+      if (req.body.fileType !== undefined) lesson.fileType = req.body.fileType;
       if (req.body.pdfUrl !== undefined) lesson.pdfUrl = req.body.pdfUrl;
+      if (req.body.fileUrl !== undefined) lesson.fileUrl = req.body.fileUrl;
       if (req.body.isFreePreview !== undefined) lesson.isFreePreview = req.body.isFreePreview;
       if (req.body.price !== undefined) lesson.price = req.body.price;
       if (req.body.quiz !== undefined) lesson.quiz = req.body.quiz;
