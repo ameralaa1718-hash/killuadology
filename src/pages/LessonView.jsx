@@ -343,7 +343,7 @@ const LessonView = () => {
                       <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>اضغط للتحميل أو عرض الملف</p>
                     </div>
                   </div>
-                  <a href={fUrl.startsWith('http') ? fUrl : `${axios.defaults.baseURL || 'http://localhost:5000'}${fUrl}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none' }}>
+                  <a href={fUrl.startsWith('http') ? fUrl : fUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none' }}>
                     فتح الملف
                   </a>
                 </div>

@@ -125,7 +125,7 @@ const ManagePurchases = () => {
                     <td>{p.amountPaid} جنيه</td>
                     <td>{new Date(p.createdAt).toLocaleDateString('ar-EG')}</td>
                     <td>
-                      <a href={`${axios.defaults.baseURL || 'http://localhost:5000'}${p.receiptImage}`} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '0.4rem 0.75rem', display: 'inline-block', textDecoration: 'none', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                      <a href={p.receiptImage?.startsWith('http') ? p.receiptImage : p.receiptImage} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '0.4rem 0.75rem', display: 'inline-block', textDecoration: 'none', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
                         عرض الإيصال
                       </a>
                     </td>
