@@ -206,15 +206,23 @@ const LessonView = () => {
                 let embedUrl = rawUrl;
                 const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
                 if (match && match[1]) {
-                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3`;
+                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3&controls=1`;
                 }
                 return (
-                  <div className="video-cinema-frame">
+                  <div className="video-cinema-frame" style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px' }}>
                     <iframe 
                       src={embedUrl}
                       loading="lazy"
                       sandbox="allow-scripts allow-same-origin allow-presentation"
-                      style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                      style={{ 
+                        border: 'none', 
+                        position: 'absolute', 
+                        top: '-5%', 
+                        left: '-3%', 
+                        width: '106%', 
+                        height: '110%', 
+                        borderRadius: '8px' 
+                      }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
@@ -226,10 +234,18 @@ const LessonView = () => {
                       }}
                       onClick={e => e.stopPropagation()}
                     />
+                    {/* Bottom-Left Click Shield: Blocks "Watch on YouTube" button completely */}
+                    <div 
+                      style={{
+                        position: 'absolute', bottom: 0, left: 0, width: '220px', height: '65px',
+                        zIndex: 4, cursor: 'default'
+                      }}
+                      onClick={e => e.stopPropagation()}
+                    />
                     {/* Bottom-Right Click Shield: Blocks YouTube logo link */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, right: 0, width: '120px', height: '55px',
+                        position: 'absolute', bottom: 0, right: 0, width: '140px', height: '65px',
                         zIndex: 4, cursor: 'default'
                       }}
                       onClick={e => e.stopPropagation()}
