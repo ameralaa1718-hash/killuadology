@@ -340,7 +340,15 @@ const ManageLessons = () => {
                       <input
                         className="input-field"
                         value={form.bunnyVideoId}
-                        onChange={e => setForm({ ...form, bunnyVideoId: e.target.value })}
+                        onChange={e => {
+                          const val = e.target.value;
+                          const vInfo = detectVideoInfo({ ...form, bunnyVideoId: val });
+                          if (vInfo.url) {
+                            setForm({ ...form, videoUrl: vInfo.url, videoType: vInfo.type, bunnyVideoId: '' });
+                          } else {
+                            setForm({ ...form, bunnyVideoId: val });
+                          }
+                        }}
                         placeholder="a1b2c3d4-xxxx-xxxx"
                         dir="ltr"
                       />
@@ -377,10 +385,21 @@ const ManageLessons = () => {
                     <input
                       className="input-field"
                       value={form.videoUrl}
-                      onChange={e => setForm({ ...form, videoUrl: e.target.value })}
+                      onChange={e => {
+                        const val = e.target.value;
+                        const vInfo = detectVideoInfo({ ...form, videoUrl: val });
+                        setForm({ ...form, videoUrl: val, videoType: vInfo.type });
+                      }}
                       placeholder="مثال: https://t.me/channel_name/123"
                       dir="ltr"
                     />
+                    <div style={{ marginTop: '0.6rem', padding: '0.75rem', background: 'rgba(59, 130, 246, 0.08)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)', fontSize: '0.82rem', color: '#93c5fd', lineHeight: '1.5' }}>
+                      💡 <strong>إرشادات تشغيل فيديوهات التليجرام:</strong>
+                      <ul style={{ margin: '0.4rem 0 0 0', paddingRight: '1.2rem' }}>
+                        <li><strong>القنوات العامة (Public Channel):</strong> مثل <code>https://t.me/channel_name/123</code> يشتغل الفيديو داخل مشغل الموقع مباشرة.</li>
+                        <li><strong>القنوات الخاصة (Private Channel):</strong> تليجرام يمنع تضمن القنوات الخاصة <code>/c/</code> بالـ Web Player. لتشغيل الفيديو داخل المشغل: اجعل القناة <strong>عامة (Public)</strong>، أو استخدم <strong>Google Drive / YouTube (غير مدرج) / Bunny</strong>.</li>
+                      </ul>
+                    </div>
                   </div>
                 )}
 
