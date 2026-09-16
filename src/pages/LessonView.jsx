@@ -206,7 +206,7 @@ const LessonView = () => {
                 let embedUrl = rawUrl;
                 const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
                 if (match && match[1]) {
-                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1`;
+                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&enablejsapi=1`;
                 }
                 return (
                   <div className="video-cinema-frame">
@@ -217,6 +217,14 @@ const LessonView = () => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
+                    {/* Top Click Shield to block opening youtube.com in new tab */}
+                    <div 
+                      style={{
+                        position: 'absolute', top: 0, left: 0, width: '100%', height: '55px',
+                        zIndex: 4, cursor: 'default'
+                      }}
+                      onClick={e => e.stopPropagation()}
+                    />
                     {user && (
                       <div 
                         id="video-watermark" 
