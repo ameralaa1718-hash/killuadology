@@ -241,8 +241,57 @@ const LessonView = () => {
 
               // 4. Telegram Video
               if (vType === 'telegram' && rawUrl) {
+                const isPrivate = rawUrl.includes('/c/');
                 const cleanUrl = rawUrl.split('?')[0];
                 const embedUrl = cleanUrl.endsWith('?embed=1') ? cleanUrl : `${cleanUrl}?embed=1`;
+
+                if (isPrivate) {
+                  return (
+                    <div style={{
+                      padding: '3.5rem 2rem',
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%)',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                      textAlign: 'center',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+                      maxWidth: '650px',
+                      margin: '1rem auto'
+                    }}>
+                      <div style={{
+                        width: '72px', height: '72px',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto 1.25rem auto',
+                        color: '#3b82f6',
+                        boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)'
+                      }}>
+                        <span style={{ fontSize: '2rem' }}>✈️</span>
+                      </div>
+                      <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+                        فيديو المحاضرة على قناة تليجرام
+                      </h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1.75rem', lineHeight: '1.6' }}>
+                        هذا الفيديو مرفوع على قناة تليجرام خاصة. اضغط على الزر أدناه لمشاهدة الفيديو مباشرة عبر تطبيق تليجرام:
+                      </p>
+                      <a 
+                        href={rawUrl} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="btn-primary" 
+                        style={{ 
+                          display: 'inline-flex', alignItems: 'center', gap: '0.6rem', 
+                          padding: '0.85rem 2rem', fontSize: '1.05rem', textDecoration: 'none',
+                          borderRadius: '50px', backgroundColor: '#229ED9', color: '#ffffff',
+                          boxShadow: '0 4px 15px rgba(34, 158, 217, 0.4)', fontWeight: 600
+                        }}
+                      >
+                        <span>مشاهدة الفيديو في تطبيق Telegram ✈️</span>
+                      </a>
+                    </div>
+                  );
+                }
+
                 return (
                   <div>
                     <div className="video-cinema-frame" style={{ marginBottom: '1.5rem', minHeight: '380px' }}>
@@ -254,7 +303,7 @@ const LessonView = () => {
                       ></iframe>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <a href={rawUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                      <a href={rawUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', backgroundColor: '#229ED9', color: '#fff' }}>
                         <span>فتح الفيديو في تطبيق Telegram ✈️</span>
                       </a>
                     </div>
