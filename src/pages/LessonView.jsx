@@ -217,6 +217,20 @@ const LessonView = () => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
+                    {user && (
+                      <div 
+                        id="video-watermark" 
+                        style={{
+                          position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
+                          color: 'rgba(255, 255, 255, 0.25)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+                          pointerEvents: 'none', userSelect: 'none', zIndex: 10, fontSize: '0.95rem',
+                          fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        🔒 {user.fullName} - {user.phoneNumber || user.email}
+                      </div>
+                    )}
                   </div>
                 );
               }
@@ -235,6 +249,20 @@ const LessonView = () => {
                       allow="autoplay"
                       allowFullScreen
                     ></iframe>
+                    {user && (
+                      <div 
+                        id="video-watermark" 
+                        style={{
+                          position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
+                          color: 'rgba(255, 255, 255, 0.25)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+                          pointerEvents: 'none', userSelect: 'none', zIndex: 10, fontSize: '0.95rem',
+                          fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        🔒 {user.fullName} - {user.phoneNumber || user.email}
+                      </div>
+                    )}
                   </div>
                 );
               }
@@ -301,6 +329,20 @@ const LessonView = () => {
                         style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
                         allowFullScreen
                       ></iframe>
+                      {user && (
+                        <div 
+                          id="video-watermark" 
+                          style={{
+                            position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
+                            color: 'rgba(255, 255, 255, 0.25)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+                            pointerEvents: 'none', userSelect: 'none', zIndex: 10, fontSize: '0.95rem',
+                            fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          🔒 {user.fullName} - {user.phoneNumber || user.email}
+                        </div>
+                      )}
                     </div>
                     <div style={{ textAlign: 'center' }}>
                       <a href={rawUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', backgroundColor: '#229ED9', color: '#fff' }}>
@@ -329,6 +371,20 @@ const LessonView = () => {
                         style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
                         allowFullScreen
                       ></iframe>
+                    )}
+                    {user && (
+                      <div 
+                        id="video-watermark" 
+                        style={{
+                          position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
+                          color: 'rgba(255, 255, 255, 0.25)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+                          pointerEvents: 'none', userSelect: 'none', zIndex: 10, fontSize: '0.95rem',
+                          fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        🔒 {user.fullName} - {user.phoneNumber || user.email}
+                      </div>
                     )}
                   </div>
                 );
