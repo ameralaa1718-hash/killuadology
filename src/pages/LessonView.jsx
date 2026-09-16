@@ -161,33 +161,30 @@ const LessonView = () => {
                 <p style={{ margin: 0 }}>تم الكشف عن محاولة تعديل مكونات الصفحة أو إخفاء العلامة المائية. تم إيقاف الفيديو لأسباب تتعلق بحماية حقوق الملكية الفكرية.</p>
               </div>
             ) : (() => {
-              const vType = lesson.videoType || (lesson.bunnyVideoId ? 'bunny' : lesson.videoUrl?.includes('youtube') || lesson.videoUrl?.includes('youtu.be') ? 'youtube' : lesson.videoUrl?.includes('t.me') ? 'telegram' : lesson.videoUrl ? 'external' : 'bunny');
+              const rawUrl = lesson.videoUrl || '';
+              let vType = lesson.videoType || 'bunny';
+
+              // Auto-detect source if videoUrl is set
+              if (rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be')) {
+                vType = 'youtube';
+              } else if (rawUrl.includes('t.me')) {
+                vType = 'telegram';
+              } else if (rawUrl.includes('drive.google.com')) {
+                vType = 'drive';
+              } else if (rawUrl && vType === 'bunny' && !lesson.bunnyVideoId) {
+                vType = 'external';
+              }
 
               // 1. Bunny Stream
               if (vType === 'bunny' && lesson.bunnyVideoId) {
                 return (
                   <div id="video-container" className="video-cinema-frame">
-                    {!isFocused && (
-                      <div 
-                        style={{
-                          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
-                          zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center',
-                          justifyContent: 'center', color: '#fff', textAlign: 'center', padding: '1rem', cursor: 'pointer'
-                        }}
-                        onClick={() => setIsFocused(true)}
-                      >
-                        <PlayCircle size={48} style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }} />
-                        <h4 style={{ margin: '0 0 0.5rem 0' }}>تم إيقاف الفيديو مؤقتاً</h4>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>يرجى الضغط هنا أو العودة للصفحة لاستكمال المشاهدة</p>
-                      </div>
-                    )}
                     <iframe 
                       src={`https://iframe.mediadelivery.net/embed/${lesson.bunnyLibraryId || import.meta.env.VITE_BUNNY_LIBRARY_ID || 'YOUR_LIBRARY_ID'}/${lesson.bunnyVideoId}?autoplay=false`}
                       loading="lazy" 
                       style={{ 
                         border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', 
-                        borderRadius: '8px', filter: !isFocused ? 'blur(12px)' : 'none', transition: 'filter 0.3s ease'
+                        borderRadius: '8px'
                       }} 
                       allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;" 
                       allowFullScreen
@@ -210,10 +207,10 @@ const LessonView = () => {
                 );
               }
 
-              // 2. YouTube Video
-              if (vType === 'youtube' && lesson.videoUrl) {
-                let embedUrl = lesson.videoUrl;
-                const match = lesson.videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+              // 2. YouTube Video (Supports Watch, Shorts, Embed, Short URLs)
+              if (vType === 'youtube' && rawUrl) {
+                let embedUrl = rawUrl;
+                const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
                 if (match && match[1]) {
                   embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1`;
                 }
@@ -230,9 +227,27 @@ const LessonView = () => {
                 );
               }
 
-              // 3. Telegram Video
-              if (vType === 'telegram' && lesson.videoUrl) {
-                const embedUrl = lesson.videoUrl.endsWith('?embed=1') ? lesson.videoUrl : `${lesson.videoUrl.split('?')[0]}?embed=1`;
+              // 3. Google Drive Video
+              if (vType === 'drive' && rawUrl) {
+                let previewUrl = rawUrl;
+                if (rawUrl.includes('/view')) {
+                  previewUrl = rawUrl.replace('/view', '/preview');
+                }
+                return (
+                  <div className="video-cinema-frame">
+                    <iframe 
+                      src={previewUrl}
+                      style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                      allow="autoplay"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                );
+              }
+
+              // 4. Telegram Video
+              if (vType === 'telegram' && rawUrl) {
+                const embedUrl = rawUrl.endsWith('?embed=1') ? rawUrl : `${rawUrl.split('?')[0]}?embed=1`;
                 return (
                   <div>
                     <div className="video-cinema-frame" style={{ marginBottom: '1.5rem' }}>
@@ -243,7 +258,7 @@ const LessonView = () => {
                       ></iframe>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <a href={lesson.videoUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                      <a href={rawUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
                         <span>فتح الفيديو في تطبيق Telegram ✈️</span>
                       </a>
                     </div>
@@ -251,21 +266,21 @@ const LessonView = () => {
                 );
               }
 
-              // 4. External Video
-              if (vType === 'external' && lesson.videoUrl) {
-                const isDirectVideo = lesson.videoUrl.endsWith('.mp4') || lesson.videoUrl.endsWith('.webm') || lesson.videoUrl.endsWith('.ogg');
+              // 5. External Video (MP4 / Direct Embed)
+              if (vType === 'external' && rawUrl) {
+                const isDirectVideo = rawUrl.endsWith('.mp4') || rawUrl.endsWith('.webm') || rawUrl.endsWith('.ogg');
                 return (
                   <div className="video-cinema-frame">
                     {isDirectVideo ? (
                       <video 
-                        src={lesson.videoUrl} 
+                        src={rawUrl} 
                         controls 
                         controlsList="nodownload"
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
                       />
                     ) : (
                       <iframe 
-                        src={lesson.videoUrl}
+                        src={rawUrl}
                         style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
                         allowFullScreen
                       ></iframe>
