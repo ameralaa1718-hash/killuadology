@@ -5,6 +5,65 @@ import './AdminModal.css';
 import { Plus, Edit2, Trash2, ArrowRight, BookOpen, PlayCircle, FileText, Gift, Lock } from 'lucide-react';
 import './AdminDashboard.css';
 
+export const detectVideoInfo = (item = {}) => {
+  let url = (item.videoUrl || '').trim();
+  let bunnyId = (item.bunnyVideoId || '').trim();
+
+  // 1. Extract clean URL if an <iframe> tag was pasted in either field
+  const iframeMatch = (url || bunnyId).match(/src=["']([^"']+)["']/i);
+  if (iframeMatch && iframeMatch[1]) {
+    url = iframeMatch[1];
+    bunnyId = '';
+  }
+
+  // 2. If bunnyId is actually a URL (starts with http, https, t.me, telegram, youtube, drive)
+  if (
+    bunnyId && (
+      bunnyId.startsWith('http://') ||
+      bunnyId.startsWith('https://') ||
+      bunnyId.includes('t.me') ||
+      bunnyId.includes('telegram') ||
+      bunnyId.includes('youtube') ||
+      bunnyId.includes('youtu.be') ||
+      bunnyId.includes('drive.google')
+    )
+  ) {
+    if (!url) url = bunnyId;
+    bunnyId = '';
+  }
+
+  // 3. Fix links starting with t.me/ or telegram.me/ without protocol
+  if (url.startsWith('t.me/') || url.startsWith('telegram.me/')) {
+    url = 'https://' + url;
+  }
+
+  const urlLower = url.toLowerCase();
+  const isTelegram = urlLower.includes('t.me') || urlLower.includes('telegram');
+  const isYoutube = urlLower.includes('youtube.com') || urlLower.includes('youtu.be');
+  const isDrive = urlLower.includes('drive.google.com');
+
+  const isUrlLike = bunnyId.includes('/') || bunnyId.includes(':') || bunnyId.includes('.');
+  const isBunny = !url && !!bunnyId && !bunnyId.includes('xxxx') && bunnyId.length >= 5 && !isUrlLike;
+  const isExternal = !!url && !isTelegram && !isYoutube && !isDrive;
+
+  let type = item.videoType || 'bunny';
+  if (isTelegram) type = 'telegram';
+  else if (isYoutube) type = 'youtube';
+  else if (isDrive) type = 'drive';
+  else if (isExternal) type = 'external';
+
+  return {
+    url,
+    bunnyId: isBunny ? bunnyId : '',
+    type,
+    isTelegram,
+    isYoutube,
+    isDrive,
+    isBunny,
+    isExternal
+  };
+};
+
 const emptyForm = {
   title: '',
   description: '',
@@ -102,17 +161,17 @@ const ManageLessons = () => {
 
   const handleOpenEdit = (lesson) => {
     setEditingLesson(lesson);
-    const vType = lesson.videoType || (lesson.videoUrl?.includes('youtube') || lesson.videoUrl?.includes('youtu.be') ? 'youtube' : lesson.videoUrl?.includes('t.me') ? 'telegram' : lesson.videoUrl ? 'external' : 'bunny');
+    const vInfo = detectVideoInfo(lesson);
     const fType = lesson.fileType || (lesson.fileUrl?.includes('drive.google.com') ? 'drive' : lesson.fileUrl ? 'external' : 'pdf');
 
     setForm({
       title: lesson.title,
       description: lesson.description || '',
       order: lesson.order,
-      videoType: vType,
-      bunnyVideoId: lesson.bunnyVideoId || '',
+      videoType: vInfo.type,
+      bunnyVideoId: vInfo.bunnyId,
       bunnyLibraryId: lesson.bunnyLibraryId || '',
-      videoUrl: lesson.videoUrl || '',
+      videoUrl: vInfo.url,
       fileType: fType,
       pdfUrl: lesson.pdfUrl || '',
       fileUrl: lesson.fileUrl || '',
@@ -131,20 +190,10 @@ const ManageLessons = () => {
     setMsg('');
     try {
       const payload = { ...form };
-
-      // Auto-correct videoType if videoUrl is set
-      if (payload.videoUrl) {
-        const url = payload.videoUrl.toLowerCase();
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-          payload.videoType = 'youtube';
-        } else if (url.includes('t.me')) {
-          payload.videoType = 'telegram';
-        } else if (url.includes('drive.google.com')) {
-          payload.videoType = 'drive';
-        } else if (payload.videoType === 'bunny' && !payload.bunnyVideoId) {
-          payload.videoType = 'external';
-        }
-      }
+      const vInfo = detectVideoInfo(payload);
+      payload.videoType = vInfo.type;
+      payload.videoUrl = vInfo.url;
+      payload.bunnyVideoId = vInfo.bunnyId;
 
       // Auto-correct fileType if fileUrl is set
       if (payload.fileUrl) {
@@ -689,19 +738,15 @@ const ManageLessons = () => {
                         </div>
                       </td>
                       <td>
-                        {lesson.bunnyVideoId ? (
-                          <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>🔒 Bunny Stream</span>
-                        ) : videoUrl.includes('youtube') || videoUrl.includes('youtu.be') ? (
-                          <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}>▶️ يوتيوب</span>
-                        ) : videoUrl.includes('t.me') ? (
-                          <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.3)' }}>✈️ تليجرام</span>
-                        ) : videoUrl.includes('drive.google') ? (
-                          <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>📁 جوجل درايف</span>
-                        ) : videoUrl ? (
-                          <span className="badge badge-info" style={{ fontSize: '0.75rem' }}>🌐 فيديو خارجي</span>
-                        ) : (
-                          <span className="badge badge-warning" style={{ fontSize: '0.75rem' }}>لا يوجد فيديو</span>
-                        )}
+                        {(() => {
+                          const vInfo = detectVideoInfo(lesson);
+                          if (vInfo.isBunny) return <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>🔒 Bunny Stream</span>;
+                          if (vInfo.isYoutube) return <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}>▶️ يوتيوب</span>;
+                          if (vInfo.isTelegram) return <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.3)' }}>✈️ تليجرام</span>;
+                          if (vInfo.isDrive) return <span className="badge badge-info" style={{ fontSize: '0.75rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>📁 جوجل درايف</span>;
+                          if (vInfo.url) return <span className="badge badge-info" style={{ fontSize: '0.75rem' }}>🌐 فيديو خارجي</span>;
+                          return <span className="badge badge-warning" style={{ fontSize: '0.75rem' }}>لا يوجد فيديو</span>;
+                        })()}
                       </td>
                       <td>
                         {fileUrl ? (

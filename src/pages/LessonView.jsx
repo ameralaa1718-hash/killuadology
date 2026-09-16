@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { ArrowRight, PlayCircle, FileText, ClipboardList, CheckCircle2, AlertCircle, Lock, RefreshCw } from 'lucide-react';
+import { detectVideoInfo } from './admin/ManageLessons';
 import './Lectures.css'; // Reuse styles
 import './LessonView.css';
 
@@ -161,31 +162,19 @@ const LessonView = () => {
                 <p style={{ margin: 0 }}>تم الكشف عن محاولة تعديل مكونات الصفحة أو إخفاء العلامة المائية. تم إيقاف الفيديو لأسباب تتعلق بحماية حقوق الملكية الفكرية.</p>
               </div>
             ) : (() => {
-              const rawUrl = lesson.videoUrl || '';
-              let vType = lesson.videoType || 'bunny';
+              const vInfo = detectVideoInfo(lesson);
+              const rawUrl = vInfo.url;
+              const vType = vInfo.type;
 
-              // Check if Bunny ID looks valid
-              const isValidBunnyId = lesson.bunnyVideoId && !lesson.bunnyVideoId.includes('xxxx') && lesson.bunnyVideoId.length > 5;
               const bunnyLibId = lesson.bunnyLibraryId || import.meta.env.VITE_BUNNY_LIBRARY_ID;
               const hasValidBunnyLib = bunnyLibId && bunnyLibId !== 'YOUR_LIBRARY_ID';
 
-              // Auto-detect source if videoUrl is set or if Bunny ID is invalid
-              if (rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be')) {
-                vType = 'youtube';
-              } else if (rawUrl.includes('t.me')) {
-                vType = 'telegram';
-              } else if (rawUrl.includes('drive.google.com')) {
-                vType = 'drive';
-              } else if (rawUrl && (!isValidBunnyId || !hasValidBunnyLib)) {
-                vType = 'external';
-              }
-
               // 1. Bunny Stream (Only if valid Bunny ID & Library exist)
-              if (vType === 'bunny' && isValidBunnyId && hasValidBunnyLib) {
+              if (vType === 'bunny' && vInfo.isBunny && vInfo.bunnyId && hasValidBunnyLib) {
                 return (
                   <div id="video-container" className="video-cinema-frame">
                     <iframe 
-                      src={`https://iframe.mediadelivery.net/embed/${bunnyLibId}/${lesson.bunnyVideoId}?autoplay=false`}
+                      src={`https://iframe.mediadelivery.net/embed/${bunnyLibId}/${vInfo.bunnyId}?autoplay=false`}
                       loading="lazy" 
                       style={{ 
                         border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', 
@@ -252,12 +241,14 @@ const LessonView = () => {
 
               // 4. Telegram Video
               if (vType === 'telegram' && rawUrl) {
-                const embedUrl = rawUrl.endsWith('?embed=1') ? rawUrl : `${rawUrl.split('?')[0]}?embed=1`;
+                const cleanUrl = rawUrl.split('?')[0];
+                const embedUrl = cleanUrl.endsWith('?embed=1') ? cleanUrl : `${cleanUrl}?embed=1`;
                 return (
                   <div>
-                    <div className="video-cinema-frame" style={{ marginBottom: '1.5rem' }}>
+                    <div className="video-cinema-frame" style={{ marginBottom: '1.5rem', minHeight: '380px' }}>
                       <iframe 
                         src={embedUrl}
+                        loading="lazy"
                         style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
                         allowFullScreen
                       ></iframe>
