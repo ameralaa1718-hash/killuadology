@@ -73,23 +73,25 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
           pointerEvents: 'auto'
         }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
       ></iframe>
 
-      {/* 1. TOP HEADER SHIELD: BLOCKS TITLE, AVATAR, UNLISTED BADGE & SHARE/COPY LINK BUTTON (Height: 48px) */}
+      {/* 1. TOP HEADER SHIELD: BLOCKS TITLE, AVATAR, UNLISTED BADGE & SHARE/COPY LINK BUTTON */}
       <div 
         style={{
-          position: 'absolute', top: 0, left: 0, width: '100%', height: '48px',
+          position: 'absolute', top: 0, left: 0, width: '100%',
+          height: isFullscreen ? '80px' : '60px',
           zIndex: 20, cursor: 'default'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
       />
 
-      {/* 2. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO ONLY (Width: 75px, Height: 38px) */}
+      {/* 2. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO & EMBED SETTINGS */}
       <div 
         style={{
-          position: 'absolute', bottom: 0, right: 0, width: '75px', height: '38px',
+          position: 'absolute', bottom: 0, right: 0,
+          width: isFullscreen ? '170px' : '130px',
+          height: isFullscreen ? '65px' : '50px',
           zIndex: 20, cursor: 'default'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -101,7 +103,10 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         onClick={toggleFullscreen}
         onTouchStart={toggleFullscreen}
         style={{
-          position: 'absolute', top: '8px', right: '12px', zIndex: 30,
+          position: 'absolute',
+          top: isFullscreen ? '12px' : '8px',
+          right: isFullscreen ? '16px' : '12px',
+          zIndex: 30,
           background: 'rgba(0,0,0,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)',
           borderRadius: '6px', padding: '4px 12px', fontSize: '0.8rem', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: '6px', backdropFilter: 'blur(4px)',
