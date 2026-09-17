@@ -212,53 +212,43 @@ const LessonView = () => {
                   <div 
                     className="video-cinema-frame" 
                     style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px' }}
-                    onCopy={e => { e.preventDefault(); return false; }}
                   >
                     <iframe 
                       src={embedUrl}
                       loading="lazy"
-                      sandbox="allow-scripts allow-same-origin allow-presentation"
                       style={{ 
                         border: 'none', 
                         position: 'absolute', 
-                        top: '-8%', 
-                        left: '-4%', 
-                        width: '108%', 
-                        height: '116%', 
+                        top: '-3%', 
+                        left: 0, 
+                        width: '100%', 
+                        height: '106%', 
                         borderRadius: '8px' 
                       }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
-                    {/* Top Click Shield: Blocks title, avatar, share, unlisted badge, and copy link */}
+                    {/* Top Click Shield: Thin shield covering title & avatar without blocking play click */}
                     <div 
                       style={{
-                        position: 'absolute', top: 0, left: 0, width: '100%', height: '80px',
-                        zIndex: 6, cursor: 'default'
+                        position: 'absolute', top: 0, left: 0, width: '100%', height: '44px',
+                        zIndex: 5, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
-                    {/* Top-Left Extra Shield: Specifically targets the Unlisted badge copy button */}
+                    {/* Bottom-Left Shield: Covers "Watch on YouTube" button */}
                     <div 
                       style={{
-                        position: 'absolute', top: 0, left: 0, width: '160px', height: '100px',
-                        zIndex: 6, cursor: 'default'
+                        position: 'absolute', bottom: 0, left: 0, width: '140px', height: '40px',
+                        zIndex: 5, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
-                    {/* Bottom-Left Click Shield: Blocks "Watch on YouTube" button completely */}
+                    {/* Bottom-Right Shield: Covers YouTube logo */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, left: 0, width: '250px', height: '70px',
-                        zIndex: 6, cursor: 'default'
-                      }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-                    />
-                    {/* Bottom-Right Click Shield: Blocks YouTube logo link */}
-                    <div 
-                      style={{
-                        position: 'absolute', bottom: 0, right: 0, width: '160px', height: '70px',
-                        zIndex: 6, cursor: 'default'
+                        position: 'absolute', bottom: 0, right: 0, width: '90px', height: '40px',
+                        zIndex: 5, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
