@@ -75,12 +75,15 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       ></iframe>
 
-      {/* 1. TOP HEADER SHIELD: BLOCKS TITLE, AVATAR, UNLISTED BADGE & SHARE/COPY LINK BUTTON */}
+      {/* 1. SOLID TOP HEADER BAR: COVERS TITLE, AVATAR, UNLISTED BADGE & SHARE BUTTON COMPLETELY */}
       <div 
         style={{
           position: 'absolute', top: 0, left: 0, width: '100%',
-          height: isFullscreen ? '92px' : '75px',
+          height: isFullscreen ? '85px' : '65px',
+          backgroundColor: '#000',
           zIndex: 20, cursor: 'default',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.1)',
           userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -88,15 +91,37 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
-      />
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: '#3b82f6', fontWeight: 'bold', fontSize: '0.9rem' }}>🔒 Killuadology</span>
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>| مشاهدة آمنة محمية</span>
+        </div>
 
-      {/* 2. BOTTOM-LEFT SHIELD: BLOCKS LINK CHAIN 🔗 COPY ICON */}
+        {/* Custom Fullscreen Control Button */}
+        <button
+          onClick={toggleFullscreen}
+          onTouchStart={toggleFullscreen}
+          style={{
+            background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '6px', padding: '5px 14px', fontSize: '0.82rem', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '6px', backdropFilter: 'blur(4px)',
+            fontWeight: 600, pointerEvents: 'auto'
+          }}
+        >
+          <span>{isFullscreen ? 'تصغير الشاشة ⤝' : 'توسيع الشاشة ⤢'}</span>
+        </button>
+      </div>
+
+      {/* 2. SOLID BOTTOM-LEFT COVER: PHYSICALLY COVERS LINK CHAIN 🔗 COPY ICON CIRCLED BY USER */}
       <div 
         style={{
           position: 'absolute', bottom: 0, left: 0,
-          width: isFullscreen ? '190px' : '150px',
+          width: isFullscreen ? '200px' : '160px',
           height: isFullscreen ? '75px' : '55px',
+          backgroundColor: '#000',
           zIndex: 20, cursor: 'default',
+          display: 'flex', alignItems: 'center', paddingLeft: '14px',
+          borderTopRightRadius: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)',
           userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -104,15 +129,21 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
-      />
+      >
+        <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontWeight: 600 }}>
+          🔒 حماية المحتوى
+        </span>
+      </div>
 
-      {/* 3. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO & EMBED SETTINGS */}
+      {/* 3. SOLID BOTTOM-RIGHT COVER: PHYSICALLY COVERS YOUTUBE LOGO & EMBED SETTINGS */}
       <div 
         style={{
           position: 'absolute', bottom: 0, right: 0,
-          width: isFullscreen ? '210px' : '160px',
+          width: isFullscreen ? '220px' : '170px',
           height: isFullscreen ? '75px' : '60px',
+          backgroundColor: '#000',
           zIndex: 20, cursor: 'default',
+          borderTopLeftRadius: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', borderLeft: '1px solid rgba(255,255,255,0.1)',
           userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -121,24 +152,6 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
       />
-
-      {/* Custom Fullscreen Control Button (Positioned at Top-Right header area) */}
-      <button
-        onClick={toggleFullscreen}
-        onTouchStart={toggleFullscreen}
-        style={{
-          position: 'absolute',
-          top: isFullscreen ? '12px' : '8px',
-          right: isFullscreen ? '16px' : '12px',
-          zIndex: 30,
-          background: 'rgba(0,0,0,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)',
-          borderRadius: '6px', padding: '4px 12px', fontSize: '0.8rem', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '6px', backdropFilter: 'blur(4px)',
-          fontWeight: 600
-        }}
-      >
-        <span>{isFullscreen ? 'تصغير الشاشة ⤝' : 'توسيع الشاشة ⤢'}</span>
-      </button>
 
       {/* Dynamic Moving Watermark Overlay */}
       {user && (
