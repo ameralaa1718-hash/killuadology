@@ -79,23 +79,31 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
       <div 
         style={{
           position: 'absolute', top: 0, left: 0, width: '100%',
-          height: isFullscreen ? '80px' : '60px',
-          zIndex: 20, cursor: 'default'
+          height: isFullscreen ? '92px' : '75px',
+          zIndex: 20, cursor: 'default',
+          userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+        onPointerDown={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
       />
 
       {/* 2. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO & EMBED SETTINGS */}
       <div 
         style={{
           position: 'absolute', bottom: 0, right: 0,
-          width: isFullscreen ? '170px' : '130px',
-          height: isFullscreen ? '65px' : '50px',
-          zIndex: 20, cursor: 'default'
+          width: isFullscreen ? '210px' : '160px',
+          height: isFullscreen ? '75px' : '60px',
+          zIndex: 20, cursor: 'default',
+          userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none'
         }}
         onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+        onPointerDown={e => { e.preventDefault(); e.stopPropagation(); }}
         onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
       />
 
       {/* Custom Fullscreen Control Button (Positioned at Top-Right header area) */}
