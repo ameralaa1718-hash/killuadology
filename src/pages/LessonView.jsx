@@ -209,7 +209,11 @@ const LessonView = () => {
                   embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3&controls=1`;
                 }
                 return (
-                  <div className="video-cinema-frame" style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px' }}>
+                  <div 
+                    className="video-cinema-frame" 
+                    style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px' }}
+                    onCopy={e => { e.preventDefault(); return false; }}
+                  >
                     <iframe 
                       src={embedUrl}
                       loading="lazy"
@@ -217,38 +221,46 @@ const LessonView = () => {
                       style={{ 
                         border: 'none', 
                         position: 'absolute', 
-                        top: '-5%', 
-                        left: '-3%', 
-                        width: '106%', 
-                        height: '110%', 
+                        top: '-8%', 
+                        left: '-4%', 
+                        width: '108%', 
+                        height: '116%', 
                         borderRadius: '8px' 
                       }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
-                    {/* Top Click Shield: Blocks title, avatar, share, and watch later links */}
+                    {/* Top Click Shield: Blocks title, avatar, share, unlisted badge, and copy link */}
                     <div 
                       style={{
-                        position: 'absolute', top: 0, left: 0, width: '100%', height: '65px',
-                        zIndex: 4, cursor: 'default'
+                        position: 'absolute', top: 0, left: 0, width: '100%', height: '80px',
+                        zIndex: 6, cursor: 'default'
                       }}
-                      onClick={e => e.stopPropagation()}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                    />
+                    {/* Top-Left Extra Shield: Specifically targets the Unlisted badge copy button */}
+                    <div 
+                      style={{
+                        position: 'absolute', top: 0, left: 0, width: '160px', height: '100px',
+                        zIndex: 6, cursor: 'default'
+                      }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
                     {/* Bottom-Left Click Shield: Blocks "Watch on YouTube" button completely */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, left: 0, width: '220px', height: '65px',
-                        zIndex: 4, cursor: 'default'
+                        position: 'absolute', bottom: 0, left: 0, width: '250px', height: '70px',
+                        zIndex: 6, cursor: 'default'
                       }}
-                      onClick={e => e.stopPropagation()}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
                     {/* Bottom-Right Click Shield: Blocks YouTube logo link */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, right: 0, width: '140px', height: '65px',
-                        zIndex: 4, cursor: 'default'
+                        position: 'absolute', bottom: 0, right: 0, width: '160px', height: '70px',
+                        zIndex: 6, cursor: 'default'
                       }}
-                      onClick={e => e.stopPropagation()}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
                     {user && (
                       <div 
