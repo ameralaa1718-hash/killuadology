@@ -219,19 +219,19 @@ const LessonView = () => {
                       style={{ 
                         border: 'none', 
                         position: 'absolute', 
-                        top: '-3%', 
+                        top: '-60px', 
                         left: 0, 
                         width: '100%', 
-                        height: '106%', 
+                        height: 'calc(100% + 75px)', 
                         borderRadius: '8px' 
                       }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
-                    {/* Top Click Shield: Thin shield covering title & avatar without blocking play click */}
+                    {/* Top Click Shield: Protects top cropped boundary */}
                     <div 
                       style={{
-                        position: 'absolute', top: 0, left: 0, width: '100%', height: '44px',
+                        position: 'absolute', top: 0, left: 0, width: '100%', height: '50px',
                         zIndex: 5, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -239,7 +239,7 @@ const LessonView = () => {
                     {/* Bottom-Left Shield: Covers "Watch on YouTube" button */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, left: 0, width: '140px', height: '40px',
+                        position: 'absolute', bottom: 0, left: 0, width: '160px', height: '45px',
                         zIndex: 5, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -247,7 +247,7 @@ const LessonView = () => {
                     {/* Bottom-Right Shield: Covers YouTube logo */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, right: 0, width: '90px', height: '40px',
+                        position: 'absolute', bottom: 0, right: 0, width: '110px', height: '45px',
                         zIndex: 5, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
