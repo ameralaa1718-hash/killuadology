@@ -7,6 +7,91 @@ import { detectVideoInfo } from './admin/ManageLessons';
 import './Lectures.css'; // Reuse styles
 import './LessonView.css';
 
+const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const iframeRef = useRef(null);
+
+  const togglePlay = (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!iframeRef.current) return;
+    const nextState = !isPlaying;
+    setIsPlaying(nextState);
+    const command = nextState ? 'playVideo' : 'pauseVideo';
+    try {
+      iframeRef.current.contentWindow?.postMessage(
+        JSON.stringify({ event: 'command', func: command, args: '' }),
+        '*'
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="video-cinema-frame" style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', cursor: 'pointer' }}>
+      <iframe 
+        ref={iframeRef}
+        src={`${embedUrl}&enablejsapi=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`}
+        loading="lazy"
+        style={{ 
+          border: 'none', 
+          position: 'absolute', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%', 
+          borderRadius: '8px',
+          pointerEvents: 'none' // CRITICAL: BLOCKS ALL DIRECT USER TOUCHES TO YOUTUBE BUTTONS 100%
+        }}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      ></iframe>
+
+      {/* Full Interaction Mask Overlay Layer */}
+      <div 
+        onClick={togglePlay}
+        onTouchStart={togglePlay}
+        style={{
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+          zIndex: 15, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: isPlaying ? 'transparent' : 'rgba(0,0,0,0.4)',
+          transition: 'background 0.3s ease'
+        }}
+      >
+        {!isPlaying && (
+          <div style={{
+            width: '72px', height: '72px', borderRadius: '50%',
+            backgroundColor: '#3b82f6',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', boxShadow: '0 0 30px rgba(59, 130, 246, 0.8)',
+            transition: 'transform 0.2s ease'
+          }}>
+            <PlayCircle size={46} />
+          </div>
+        )}
+      </div>
+
+      {/* Dynamic Moving Watermark Overlay */}
+      {user && (
+        <div 
+          id="video-watermark" 
+          style={{
+            position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
+            color: 'rgba(255, 255, 255, 0.28)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+            pointerEvents: 'none', userSelect: 'none', zIndex: 25, fontSize: '0.95rem',
+            fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          🔒 {user.fullName} - {user.phoneNumber || user.email}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const LessonView = () => {
   const { courseId, lessonId } = useParams();
   const { user, loading: authLoading } = useContext(AuthContext);
@@ -206,84 +291,10 @@ const LessonView = () => {
                 let embedUrl = rawUrl;
                 const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
                 if (match && match[1]) {
-                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3&controls=1`;
+                  embedUrl = `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3`;
                 }
                 return (
-                  <div 
-                    className="video-cinema-frame" 
-                    style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px' }}
-                  >
-                    <iframe 
-                      src={embedUrl}
-                      loading="lazy"
-                      style={{ 
-                        border: 'none', 
-                        position: 'absolute', 
-                        top: 0, 
-                        left: 0, 
-                        width: '100%', 
-                        height: '100%', 
-                        borderRadius: '8px' 
-                      }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    ></iframe>
-
-                    {/* 1. Top-Right Shield: BLOCKS SETTINGS GEAR ⚙️ ICON */}
-                    <div 
-                      style={{
-                        position: 'absolute', top: 0, right: 0, width: '90px', height: '65px',
-                        zIndex: 10, cursor: 'default'
-                      }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
-                    />
-
-                    {/* 2. Top-Left & Top-Center Shield: BLOCKS TITLE & CHANNEL NAME */}
-                    <div 
-                      style={{
-                        position: 'absolute', top: 0, left: 0, width: 'calc(100% - 90px)', height: '65px',
-                        zIndex: 10, cursor: 'default'
-                      }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
-                    />
-
-                    {/* 3. Bottom-Left Shield: BLOCKS LINK CHAIN 🔗 COPY ICON */}
-                    <div 
-                      style={{
-                        position: 'absolute', bottom: 0, left: 0, width: '150px', height: '65px',
-                        zIndex: 10, cursor: 'default'
-                      }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
-                    />
-
-                    {/* 4. Bottom-Right Shield: BLOCKS YOUTUBE LOGO */}
-                    <div 
-                      style={{
-                        position: 'absolute', bottom: 0, right: 0, width: '150px', height: '65px',
-                        zIndex: 10, cursor: 'default'
-                      }}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
-                    />
-
-                    {user && (
-                      <div 
-                        id="video-watermark" 
-                        style={{
-                          position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
-                          color: 'rgba(255, 255, 255, 0.25)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
-                          pointerEvents: 'none', userSelect: 'none', zIndex: 12, fontSize: '0.95rem',
-                          fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        🔒 {user.fullName} - {user.phoneNumber || user.email}
-                      </div>
-                    )}
-                  </div>
+                  <CustomYouTubePlayer embedUrl={embedUrl} user={user} watermarkPos={watermarkPos} />
                 );
               }
 
