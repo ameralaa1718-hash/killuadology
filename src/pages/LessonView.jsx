@@ -90,7 +90,23 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
       />
 
-      {/* 2. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO & EMBED SETTINGS */}
+      {/* 2. BOTTOM-LEFT SHIELD: BLOCKS LINK CHAIN 🔗 COPY ICON */}
+      <div 
+        style={{
+          position: 'absolute', bottom: 0, left: 0,
+          width: isFullscreen ? '190px' : '150px',
+          height: isFullscreen ? '75px' : '55px',
+          zIndex: 20, cursor: 'default',
+          userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none'
+        }}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+        onPointerDown={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchMove={e => { e.preventDefault(); e.stopPropagation(); }}
+      />
+
+      {/* 3. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO & EMBED SETTINGS */}
       <div 
         style={{
           position: 'absolute', bottom: 0, right: 0,
