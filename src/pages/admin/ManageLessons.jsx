@@ -178,7 +178,7 @@ const ManageLessons = () => {
       isFreePreview: lesson.isFreePreview,
       price: lesson.price || 0,
       quizEnabled: !!(lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0),
-      quiz: lesson.quiz || { title: '', isRequired: false, passPercentage: 50, questions: [] }
+      quiz: lesson.quiz || { title: '', isRequired: false, passPercentage: 50, requiredCorrectQuestions: 0, questions: [] }
     });
     setShowForm(true);
     setMsg('');
@@ -539,22 +539,52 @@ const ManageLessons = () => {
                       />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.15)', borderRadius: '6px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginTop: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.15)', borderRadius: '6px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>
                           <input
                             type="checkbox"
                             checked={form.quiz?.isRequired || false}
                             onChange={e => setForm({
                               ...form,
-                              quiz: { ...(form.quiz || { title: '', passPercentage: 50, questions: [] }), isRequired: e.target.checked }
+                              quiz: { ...(form.quiz || { title: '', passPercentage: 50, requiredCorrectQuestions: 0, questions: [] }), isRequired: e.target.checked }
                             })}
                           />
-                          🔒 الكويز إلزامي لفتح الفيديو والملفات
+                          🔒 الكويز إلزامي لفتح المحاضرة
                         </label>
                         <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          لن يتمكن الطالب من فتح المحاضرة إلا بعد اجتياز الكويز.
+                          لن يفتح الفيديو إلا بعد الاجتياز.
                         </p>
+                      </div>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="label" style={{ fontSize: '0.85rem' }}>
+                          عدد الأسئلة المطلوبة للنجاح
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max={form.quiz?.questions?.length || 100}
+                          className="input-field"
+                          value={form.quiz?.requiredCorrectQuestions || Math.ceil(((form.quiz?.passPercentage || 50) / 100) * (form.quiz?.questions?.length || 0))}
+                          onChange={e => {
+                            const req = Math.max(1, Number(e.target.value));
+                            const total = form.quiz?.questions?.length || 0;
+                            const pct = total > 0 ? Math.min(100, Math.round((req / total) * 100)) : 50;
+                            setForm({
+                              ...form,
+                              quiz: {
+                                ...(form.quiz || { title: '', isRequired: false, questions: [] }),
+                                requiredCorrectQuestions: req,
+                                passPercentage: pct
+                              }
+                            });
+                          }}
+                          style={{ padding: '0.4rem 0.75rem' }}
+                        />
+                        <small style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                          من أصل {form.quiz?.questions?.length || 0} أسئلة
+                        </small>
                       </div>
 
                       <div className="form-group" style={{ margin: 0 }}>
@@ -565,10 +595,19 @@ const ManageLessons = () => {
                           max="100"
                           className="input-field"
                           value={form.quiz?.passPercentage ?? 50}
-                          onChange={e => setForm({
-                            ...form,
-                            quiz: { ...(form.quiz || { title: '', isRequired: false, questions: [] }), passPercentage: Math.max(1, Math.min(100, Number(e.target.value))) }
-                          })}
+                          onChange={e => {
+                            const pct = Math.max(1, Math.min(100, Number(e.target.value)));
+                            const total = form.quiz?.questions?.length || 0;
+                            const req = total > 0 ? Math.round((pct / 100) * total) : 0;
+                            setForm({
+                              ...form,
+                              quiz: {
+                                ...(form.quiz || { title: '', isRequired: false, questions: [] }),
+                                passPercentage: pct,
+                                requiredCorrectQuestions: req
+                              }
+                            });
+                          }}
                           style={{ padding: '0.4rem 0.75rem' }}
                         />
                       </div>

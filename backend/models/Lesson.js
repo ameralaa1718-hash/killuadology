@@ -61,6 +61,7 @@ const lessonSchema = new mongoose.Schema({
     title: { type: String, default: '' },
     isRequired: { type: Boolean, default: false },
     passPercentage: { type: Number, default: 50 },
+    requiredCorrectQuestions: { type: Number, default: 0 },
     questions: [{
       questionText: { type: String, required: true },
       options: [{ type: String, required: true }],

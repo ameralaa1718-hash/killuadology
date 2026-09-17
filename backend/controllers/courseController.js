@@ -123,13 +123,17 @@ export const getCourseLessons = async (req, res) => {
       lessonObj.hasAccess = hasAccess;
 
       const quizRequired = !!(lessonObj.quiz && lessonObj.quiz.questions && lessonObj.quiz.questions.length > 0 && lessonObj.quiz.isRequired);
+      const totalQuizQuestions = lessonObj.quiz?.questions?.length || 0;
       const passPercentage = lessonObj.quiz?.passPercentage || 50;
+      const reqCorrect = lessonObj.quiz?.requiredCorrectQuestions || (totalQuizQuestions > 0 ? Math.ceil(((passPercentage) / 100) * totalQuizQuestions) : 0);
+      
       const userSubmission = userSubmissionsMap[lesson._id.toString()];
-      const hasPassedQuiz = userSubmission ? (userSubmission.percentage >= passPercentage) : false;
+      const hasPassedQuiz = userSubmission ? (userSubmission.score >= reqCorrect || userSubmission.percentage >= passPercentage) : false;
 
       const isQuizLocked = quizRequired && !hasPassedQuiz && (!req.user || req.user.role !== 'admin');
       lessonObj.isLockedByQuiz = isQuizLocked;
       lessonObj.hasPassedQuiz = hasPassedQuiz;
+      lessonObj.requiredCorrectQuestions = reqCorrect;
 
       if (hasAccess) {
         if (isQuizLocked) {
@@ -182,15 +186,17 @@ export const submitQuiz = async (req, res) => {
       return res.status(404).json({ message: 'لا يوجد اختبار لهذه المحاضرة' });
     }
 
+    const questions = lesson.quiz.questions;
+    const totalQuestions = questions.length;
     const passPercentage = lesson.quiz.passPercentage || 50;
+    const reqCorrect = lesson.quiz.requiredCorrectQuestions || Math.ceil(((passPercentage) / 100) * totalQuestions);
 
     // 2. Check existing submission
     const existingSubmission = await QuizSubmission.findOne({ student: studentId, lesson: lessonId });
-    if (existingSubmission && existingSubmission.percentage >= passPercentage) {
+    if (existingSubmission && (existingSubmission.score >= reqCorrect || existingSubmission.percentage >= passPercentage)) {
       return res.status(400).json({ message: 'لقد قمت باجتياز هذا الاختبار بالفعل بنجاح ولا داعي لإعادته.' });
     }
 
-    const questions = lesson.quiz.questions;
     let score = 0;
 
     // 3. Grade the submissions
@@ -201,9 +207,8 @@ export const submitQuiz = async (req, res) => {
       }
     });
 
-    const totalQuestions = questions.length;
     const percentage = Math.round((score / totalQuestions) * 100);
-    const passed = percentage >= passPercentage;
+    const passed = score >= reqCorrect || percentage >= passPercentage;
 
     let submission;
     if (existingSubmission) {

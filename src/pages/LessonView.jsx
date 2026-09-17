@@ -8,27 +8,8 @@ import './Lectures.css'; // Reuse styles
 import './LessonView.css';
 
 const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef(null);
-  const iframeRef = useRef(null);
-
-  const togglePlay = (e) => {
-    e?.preventDefault();
-    e?.stopPropagation();
-    if (!iframeRef.current) return;
-    const nextState = !isPlaying;
-    setIsPlaying(nextState);
-    const command = nextState ? 'playVideo' : 'pauseVideo';
-    try {
-      iframeRef.current.contentWindow?.postMessage(
-        JSON.stringify({ event: 'command', func: command, args: '' }),
-        '*'
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const toggleFullscreen = (e) => {
     e?.preventDefault();
@@ -76,13 +57,11 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         zIndex: isFullscreen ? 999999 : 1,
         overflow: 'hidden', 
         borderRadius: isFullscreen ? '0' : '8px', 
-        backgroundColor: '#000',
-        cursor: 'pointer'
+        backgroundColor: '#000'
       }}
     >
       <iframe 
-        ref={iframeRef}
-        src={`${embedUrl}&enablejsapi=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0`}
+        src={`${embedUrl}&enablejsapi=1&controls=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0`}
         loading="lazy"
         style={{ 
           border: 'none', 
@@ -90,44 +69,41 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
           top: 0, 
           left: 0, 
           width: '100%', 
-          height: '100%', 
-          pointerEvents: 'none' // CRITICAL: BLOCKS ALL DIRECT USER TOUCHES TO YOUTUBE BUTTONS 100% IN NORMAL AND FULLSCREEN MODE
+          height: '100%',
+          pointerEvents: 'auto'
         }}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
       ></iframe>
 
-      {/* Full Interaction Mask Overlay Layer */}
+      {/* 1. TOP HEADER SHIELD: BLOCKS TITLE, AVATAR, UNLISTED BADGE & SHARE/COPY LINK BUTTON (Height: 48px) */}
       <div 
-        onClick={togglePlay}
-        onTouchStart={togglePlay}
         style={{
-          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          zIndex: 15, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: isPlaying ? 'transparent' : 'rgba(0,0,0,0.4)',
-          transition: 'background 0.3s ease'
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '48px',
+          zIndex: 20, cursor: 'default'
         }}
-      >
-        {!isPlaying && (
-          <div style={{
-            width: '72px', height: '72px', borderRadius: '50%',
-            backgroundColor: '#3b82f6',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', boxShadow: '0 0 30px rgba(59, 130, 246, 0.8)',
-            transition: 'transform 0.2s ease'
-          }}>
-            <PlayCircle size={46} />
-          </div>
-        )}
-      </div>
+        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
+      />
 
-      {/* Custom Fullscreen Control Button */}
+      {/* 2. BOTTOM-RIGHT SHIELD: BLOCKS YOUTUBE LOGO ONLY (Width: 75px, Height: 38px) */}
+      <div 
+        style={{
+          position: 'absolute', bottom: 0, right: 0, width: '75px', height: '38px',
+          zIndex: 20, cursor: 'default'
+        }}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
+      />
+
+      {/* Custom Fullscreen Control Button (Positioned at Top-Right header area) */}
       <button
         onClick={toggleFullscreen}
         onTouchStart={toggleFullscreen}
         style={{
-          position: 'absolute', bottom: '15px', right: '15px', zIndex: 30,
-          background: 'rgba(0,0,0,0.65)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
-          borderRadius: '6px', padding: '6px 14px', fontSize: '0.85rem', cursor: 'pointer',
+          position: 'absolute', top: '8px', right: '12px', zIndex: 30,
+          background: 'rgba(0,0,0,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)',
+          borderRadius: '6px', padding: '4px 12px', fontSize: '0.8rem', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: '6px', backdropFilter: 'blur(4px)',
           fontWeight: 600
         }}
@@ -254,7 +230,15 @@ const LessonView = () => {
               🔒 هذه المحاضرة محمية باختبار إلزامي
             </h4>
             <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-              يجب عليك الإجابة على الكويز أدناه والحصول على نسبة <strong>%{lesson.quiz?.passPercentage || 50}</strong> على الأقل لفتح فيديو المحاضرة والملفات المرفقة.
+              {(() => {
+                const totalQ = lesson.quiz?.questions?.length || 0;
+                const reqQ = lesson.quiz?.requiredCorrectQuestions || Math.ceil(((lesson.quiz?.passPercentage || 50) / 100) * totalQ);
+                return (
+                  <>
+                    يجب عليك الإجابة الصحيحة على <strong>{reqQ} أسئلة</strong> على الأقل {totalQ > 0 ? `من أصل ${totalQ} أسئلة` : ''} (نسبة نجاح %{lesson.quiz?.passPercentage || 50}) لفتح المحاضرة والملفات.
+                  </>
+                );
+              })()}
             </p>
           </div>
         </div>
