@@ -219,46 +219,63 @@ const LessonView = () => {
                       style={{ 
                         border: 'none', 
                         position: 'absolute', 
-                        top: '-60px', 
+                        top: 0, 
                         left: 0, 
                         width: '100%', 
-                        height: 'calc(100% + 75px)', 
+                        height: '100%', 
                         borderRadius: '8px' 
                       }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
-                    {/* Top Click Shield: Protects top cropped boundary */}
+
+                    {/* 1. Top-Right Shield: BLOCKS SETTINGS GEAR ⚙️ ICON */}
                     <div 
                       style={{
-                        position: 'absolute', top: 0, left: 0, width: '100%', height: '50px',
-                        zIndex: 5, cursor: 'default'
+                        position: 'absolute', top: 0, right: 0, width: '90px', height: '65px',
+                        zIndex: 10, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
-                    {/* Bottom-Left Shield: Covers "Watch on YouTube" button */}
+
+                    {/* 2. Top-Left & Top-Center Shield: BLOCKS TITLE & CHANNEL NAME */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, left: 0, width: '160px', height: '45px',
-                        zIndex: 5, cursor: 'default'
+                        position: 'absolute', top: 0, left: 0, width: 'calc(100% - 90px)', height: '65px',
+                        zIndex: 10, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
-                    {/* Bottom-Right Shield: Covers YouTube logo */}
+
+                    {/* 3. Bottom-Left Shield: BLOCKS LINK CHAIN 🔗 COPY ICON */}
                     <div 
                       style={{
-                        position: 'absolute', bottom: 0, right: 0, width: '110px', height: '45px',
-                        zIndex: 5, cursor: 'default'
+                        position: 'absolute', bottom: 0, left: 0, width: '150px', height: '65px',
+                        zIndex: 10, cursor: 'default'
                       }}
                       onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
                     />
+
+                    {/* 4. Bottom-Right Shield: BLOCKS YOUTUBE LOGO */}
+                    <div 
+                      style={{
+                        position: 'absolute', bottom: 0, right: 0, width: '150px', height: '65px',
+                        zIndex: 10, cursor: 'default'
+                      }}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                      onTouchStart={e => { e.preventDefault(); e.stopPropagation(); }}
+                    />
+
                     {user && (
                       <div 
                         id="video-watermark" 
                         style={{
                           position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
                           color: 'rgba(255, 255, 255, 0.25)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
-                          pointerEvents: 'none', userSelect: 'none', zIndex: 10, fontSize: '0.95rem',
+                          pointerEvents: 'none', userSelect: 'none', zIndex: 12, fontSize: '0.95rem',
                           fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
                           whiteSpace: 'nowrap'
                         }}
