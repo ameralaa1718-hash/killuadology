@@ -9,6 +9,8 @@ import './LessonView.css';
 
 const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
   const iframeRef = useRef(null);
 
   const togglePlay = (e) => {
@@ -28,11 +30,59 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
     }
   };
 
+  const toggleFullscreen = (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current.webkitRequestFullscreen) {
+        containerRef.current.webkitRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement || !!document.webkitFullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
   return (
-    <div className="video-cinema-frame" style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', cursor: 'pointer' }}>
+    <div 
+      ref={containerRef}
+      className="video-cinema-frame" 
+      style={{ 
+        position: isFullscreen ? 'fixed' : 'relative',
+        top: isFullscreen ? 0 : 'auto',
+        left: isFullscreen ? 0 : 'auto',
+        width: isFullscreen ? '100vw' : '100%',
+        height: isFullscreen ? '100vh' : '100%',
+        zIndex: isFullscreen ? 999999 : 1,
+        overflow: 'hidden', 
+        borderRadius: isFullscreen ? '0' : '8px', 
+        backgroundColor: '#000',
+        cursor: 'pointer'
+      }}
+    >
       <iframe 
         ref={iframeRef}
-        src={`${embedUrl}&enablejsapi=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`}
+        src={`${embedUrl}&enablejsapi=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0`}
         loading="lazy"
         style={{ 
           border: 'none', 
@@ -41,11 +91,8 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
           left: 0, 
           width: '100%', 
           height: '100%', 
-          borderRadius: '8px',
-          pointerEvents: 'none' // CRITICAL: BLOCKS ALL DIRECT USER TOUCHES TO YOUTUBE BUTTONS 100%
+          pointerEvents: 'none' // CRITICAL: BLOCKS ALL DIRECT USER TOUCHES TO YOUTUBE BUTTONS 100% IN NORMAL AND FULLSCREEN MODE
         }}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
       ></iframe>
 
       {/* Full Interaction Mask Overlay Layer */}
@@ -73,13 +120,28 @@ const CustomYouTubePlayer = ({ embedUrl, user, watermarkPos }) => {
         )}
       </div>
 
+      {/* Custom Fullscreen Control Button */}
+      <button
+        onClick={toggleFullscreen}
+        onTouchStart={toggleFullscreen}
+        style={{
+          position: 'absolute', bottom: '15px', right: '15px', zIndex: 30,
+          background: 'rgba(0,0,0,0.65)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '6px', padding: '6px 14px', fontSize: '0.85rem', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '6px', backdropFilter: 'blur(4px)',
+          fontWeight: 600
+        }}
+      >
+        <span>{isFullscreen ? 'تصغير الشاشة ⤝' : 'توسيع الشاشة ⤢'}</span>
+      </button>
+
       {/* Dynamic Moving Watermark Overlay */}
       {user && (
         <div 
           id="video-watermark" 
           style={{
             position: 'absolute', top: watermarkPos.top, left: watermarkPos.left,
-            color: 'rgba(255, 255, 255, 0.28)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+            color: 'rgba(255, 255, 255, 0.32)', textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
             pointerEvents: 'none', userSelect: 'none', zIndex: 25, fontSize: '0.95rem',
             fontWeight: 'bold', direction: 'ltr', transition: 'top 1.2s ease-in-out, left 1.2s ease-in-out',
             whiteSpace: 'nowrap'
